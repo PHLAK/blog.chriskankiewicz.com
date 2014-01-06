@@ -7,11 +7,11 @@ Powered by [Pelican](http://docs.getpelican.com/en/3.3.0/).
 Getting Started
 ---------------
 
-### Install Pelican for Editing Content
+##### Install Pelican for Editing Content
 
     $ sudo pip install pelican markdown
 
-### Generatiing Content
+##### Generatiing Content
 
     $ pelican /path/to/content
 
