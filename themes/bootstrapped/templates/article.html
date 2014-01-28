@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+
+<head>
+
+    {% include 'elements/head.html' %}
+
+    {% for keyword in article.keywords %}
+        <meta name="keywords" contents="{{ keyword }}" />
+    {% endfor %}
+
+    {% for description in article.description %}
+        <meta name="description" contents="{{ description }}" />
+    {% endfor %}
+
+    {% for tag in article.tags %}
+        <meta name="tags" contents="{{ tag }}" />
+    {% endfor %}
+
+</head>
+
+<body>
+
+    {% include 'elements/navbar.html' %}
+
+    <div class="content-area">
+        <div class="container">
+
+            <div class="row">
+
+                <div class="posts-wrapper col-md-8">
+
+                    <div class="post">
+                        <div class="post-header">
+                            <h2 class="post-title">
+                                <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a>
+                            </h2>
+                            <div class="post-meta">
+                                <span class="post-author">
+                                    By
+                                    {% if article.author %}
+                                        <a href="{{ SITEURL }}/{{ article.author.url }}">{{ article.author }}</a>
+                                    {% else %}
+                                        Anonymous
+                                    {% endif %}
+                                </span>
+
+                                <span class="sep">|</span>
+
+                                <span class="post-categories">
+                                    {% for tag in article.tags %}
+                                        <a href="#">{{ tag }}</a>
+                                    {% endfor %}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="post-body">
+
+                            {{ article.content }}
+
+                        </div>
+
+                        <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
+                            <div class="month">{{ article.date|strftime('%b') }}</div>
+                            <div class="day">{{ article.date|strftime('%d') }}</div>
+                        </div>
+
+                    </div>
+
+                    {% if article.share_post and article.status != 'draft' %}
+                    <div class="post-share-links">
+
+                        Share on:
+
+                        <a href="{{article.share_post['google-plus']}}" target="_blank" title="Share on Google Plus">
+                            <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                        </a>
+
+                        <a href="{{article.share_post['twitter']}}" target="_blank" title="Share on Twitter">
+                            <i class="fa fa-twitter fa-lg fa-fw"></i>
+                        </a>
+
+                        <a href="{{article.share_post['facebook']}}" target="_blank" title="Share on Facebook">
+                            <i class="fa fa-facebook fa-lg fa-fw"></i>
+                        </a>
+
+                        <a href="{{article.share_post['email']}}" target="_blank" title="Share via Email">
+                            <i class="fa fa-envelope fa-lg fa-fw"></i>
+                        </a>
+
+                    </div>
+                    {% endif %}
+
+
+
+                    <div id="comments-wrapper">
+                        <div id="comments"></div>
+                    </div>
+                    {{ article.metadata.googleplus_comments }}
+
+                </div>
+
+                <div class="sidebar col-md-4">
+
+                    {% include 'elements/sidebar-header.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-search.html' %}
+
+                    {% if article.related_posts %}
+
+                        <div class="sidebar-separator"></div>
+
+                        {% include 'elements/sidebar-related-posts.html' %}
+
+                    {% endif %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-recent-posts.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-links.html' %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'elements/footer.html' %}
+
+    <script type="text/javascript" src="/js/global.js"></script>
+
+</body>
+
+</html>
