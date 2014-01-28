@@ -3,8 +3,7 @@ Date: 2012-07-06 19:08
 Category: Linux
 Tags: Gmail, Linux, Postfix, Ubuntu
 Slug: postfix-using-gmail-as-a-relay-host
-Author: Chris Kankiewiczs
-Summary: Forward email through Gmail using Postfix in Linux
+Author: Chris Kankiewicz
 
 I maintain several Linux servers at any given moment. Every server has postfix
 installed for sending emails, usually notifications or warning messages of some
@@ -20,10 +19,12 @@ password for later.
 
 ### Install postfix
 
+    :::bash
     $ sudo apt-get install postfix
 
 ### Add the following to /etc/postfix/main.cnf
 
+    :::text
     # Forward mail through Gmail
     relayhost = [smtp.gmail.com]:587
     smtp_use_tls = yes
@@ -34,6 +35,7 @@ password for later.
 
 ### Create the file /etc/postfix/sasl_passwd and add the following:
 
+    :::text
     [smtp.gmail.com]:587 [username]@gmail.com:[password]
 
 Be sure to replace `[username]` and `[password]` with your account user name and
@@ -41,16 +43,19 @@ password.
 
 ### Modify file permissions and generate sasl_passwd.db
 
+    :::bash
     $ cd /etc/postfix
     $ postmap sasl_passwd
     $ chmod 600 sasl_passwd sasl_passwd.db
 
 ### Restart postfix service
 
+    :::bash
     $ sudo service postfix restart
 
 ### Send a test email
 
+    :::bash
     $ sudo apt-get install mailutils
     $ echo 'Success!' | mailx -s 'Test Message' [email_address]
 

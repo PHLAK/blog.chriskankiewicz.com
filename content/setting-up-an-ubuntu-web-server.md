@@ -13,8 +13,7 @@ I primarily work with Ubuntu servers, but most of the commands here
 should work exactly the same in Debian or Ubuntu. I've tried to note
 where differences may occur.
 
-<!--more-->  
-Download and Install the OS  
+Download and Install the OS
 ---------------------------
 
 If you are setting up your own server, the first thing you will need to
@@ -22,7 +21,7 @@ do is download the ISO that corresponds to your hardware (32/64-bit),
 burn it to CD and install it to your server.
 
 \* For Ubuntu go to
-[http://www.ubuntu.com/download/server/download](http://www.ubuntu.com/download/server/download)  
+[http://www.ubuntu.com/download/server/download](http://www.ubuntu.com/download/server/download)
 \* For Debian go to
 [http://www.debian.org/distrib/](http://www.debian.org/distrib/)
 
@@ -36,7 +35,7 @@ instructions below.
 
 -----
 
-Create a User Account  
+Create a User Account
 ---------------------
 
 On most Ubuntu installations you should have created a user account
@@ -61,14 +60,14 @@ following may already be configured.
 
 \#\#\# Add your username under the existing \`root\` entry:
 
-root ALL=(ALL) ALL  
+root ALL=(ALL) ALL
 <user_name> ALL=(ALL) ALL
 
 Now log out and back in with the new user.
 
 -----
 
-Update Your System  
+Update Your System
 ------------------
 
 Most installations will not be up-to-date after installation and will be
@@ -77,15 +76,15 @@ pull in all the latest patches.
 
 \#\#\# Run system updates:
 
-\$ sudo apt-get update  
-\$ sudo apt-get upgrade  
+\$ sudo apt-get update
+\$ sudo apt-get upgrade
 \$ sudo apt-get dist-upgrade
 
 Once all updates are complete, restart your system.
 
 -----
 
-Configure Hostname and Timezone  
+Configure Hostname and Timezone
 -------------------------------
 
 While the hostname is of minor importance for most things to run
@@ -107,7 +106,7 @@ Add your new hostname to this file and save it, then run:
 
 Add the following if not already present:
 
-127.0.0.1 localhost.localdomain localhost  
+127.0.0.1 localhost.localdomain localhost
 <server_ip> <hostname>.example.com <hostname>
 
 \#\#\# Set the Timezone:
@@ -116,7 +115,7 @@ Add the following if not already present:
 
 -----
 
-Set Up LAMP Server with APC and PHPMyAdmin  
+Set Up LAMP Server with APC and PHPMyAdmin
 ----------------------------------
 
 Installing the LAMP stack is quick and painless with apt. Simply use the
@@ -142,7 +141,7 @@ The defaults should be fine for a basic web server setup.
 
 -----
 
-Configure PHP and APC  
+Configure PHP and APC
 ------------------------
 
 Now that you have your LAMP stack setup you will need to configure it
@@ -159,14 +158,14 @@ may already be set, but it's a good idea to check them all anyway.
 
 Now locate and modify the following values:
 
-short\_open\_tag = On  
-max\_execution\_time = 30  
-memory\_limit = 128M  
-error\_reporting = E\_ALL & \~E\_DEPRECATED  
-display\_errors = Off  
-log\_errors = On  
-post\_max\_size = 8M  
-upload\_max\_filesize = 8M  
+short\_open\_tag = On
+max\_execution\_time = 30
+memory\_limit = 128M
+error\_reporting = E\_ALL & \~E\_DEPRECATED
+display\_errors = Off
+log\_errors = On
+post\_max\_size = 8M
+upload\_max\_filesize = 8M
 date.timezone = <your_timezone> ; See: http://php.net/date.timezone
 
 \#\#\# Edit your APC config:
@@ -175,7 +174,7 @@ date.timezone = <your_timezone> ; See: http://php.net/date.timezone
 
 Add the following:
 
-extension = apc.so  
+extension = apc.so
 apc.shm\_size = 128
 
 \#\#\# Restart Apache:
@@ -184,7 +183,7 @@ apc.shm\_size = 128
 
 -----
 
-Set Web Directory User and Permissions  
+Set Web Directory User and Permissions
 --------------------------------------
 
 Now that you have everything installed and configured you'll need to set
@@ -200,7 +199,7 @@ group permissions.
 
 \#\#\# Change the group of your web directory:
 
-\$ sudo chgrp -R webdev /var/www/  
+\$ sudo chgrp -R webdev /var/www/
 \$ sudo chmod -R g+rw /var/www/
 
 \#\#\# Set the guid bit on all folders in your web directory:
@@ -217,7 +216,7 @@ group permissions.
 
 -----
 
-Enable System Monitoring and Alerts  
+Enable System Monitoring and Alerts
 ----------------------------------
 
 Even the best configured servers have problems every now and again. To
@@ -238,57 +237,57 @@ need to.
 
 \#\#\# Monit configuration:
 
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-\#\# Monit control file  
+\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+\#\# Monit control file
 
 \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
 
-set daemon 120 \# Check services at 2-minute intervals  
+set daemon 120 \# Check services at 2-minute intervals
 set logfile syslog facility log\_daemon \# Set logging to the
-systemlog  
+systemlog
 set alert <email_address> \# Set your email address
 
-set mailserver localhost  
+set mailserver localhost
 with timeout 15 seconds
 
-set httpd port 2812 and  
+set httpd port 2812 and
 allow <user_name>: <password> \# set user name and password here
 
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-\#\# Services  
+\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+\#\# Services
 
 \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
 
-check system <hostname>  
-if loadavg (1min) \> 4 then alert  
-if loadavg (5min) \> 2 then alert  
-if memory usage \> 80% then alert  
-if cpu usage (user) \> 70% then alert  
-if cpu usage (system) \> 30% then alert  
+check system <hostname>
+if loadavg (1min) \> 4 then alert
+if loadavg (5min) \> 2 then alert
+if memory usage \> 80% then alert
+if cpu usage (user) \> 70% then alert
+if cpu usage (system) \> 30% then alert
 if cpu usage (wait) \> 20% then alert
 
-check process apache with pidfile /var/run/apache2.pid  
-start program = "/etc/init.d/apache2 start" with timeout 60 seconds  
-stop program = "/etc/init.d/apache2 stop"  
-if cpu \> 60% for 2 cycles then alert  
-if cpu \> 90% for 5 cycles then restart  
-if totalmem \> 512.0 MB for 5 cycles then alert  
-\# if totalmem \> 512.0 MB for 5 cycles then restart  
-if children \> 250 then restart  
-if failed host localhost port 80 protocol http then restart  
+check process apache with pidfile /var/run/apache2.pid
+start program = "/etc/init.d/apache2 start" with timeout 60 seconds
+stop program = "/etc/init.d/apache2 stop"
+if cpu \> 60% for 2 cycles then alert
+if cpu \> 90% for 5 cycles then restart
+if totalmem \> 512.0 MB for 5 cycles then alert
+\# if totalmem \> 512.0 MB for 5 cycles then restart
+if children \> 250 then restart
+if failed host localhost port 80 protocol http then restart
 if 3 restarts within 5 cycles then timeout
 
-check process mysql with pidfile /var/lib/mysql/<hostname>.pid  
-group mysql  
-start program = "/etc/init.d/mysql start"  
-stop program = "/etc/init.d/mysql stop"  
-if failed host localhost port 3306 then restart  
+check process mysql with pidfile /var/lib/mysql/<hostname>.pid
+group mysql
+start program = "/etc/init.d/mysql start"
+stop program = "/etc/init.d/mysql stop"
+if failed host localhost port 3306 then restart
 if 5 restarts within 5 cycles then timeout
 
-check process sshd with pidfile /var/run/sshd.pid  
-start program "/etc/init.d/ssh start"  
-stop program "/etc/init.d/ssh stop"  
-if failed port 22 protocol ssh then restart  
+check process sshd with pidfile /var/run/sshd.pid
+start program "/etc/init.d/ssh start"
+stop program "/etc/init.d/ssh stop"
+if failed port 22 protocol ssh then restart
 if 5 restarts within 5 cycles then timeout
 
 \#\#\# Edit the monit config file:
@@ -297,7 +296,7 @@ if 5 restarts within 5 cycles then timeout
 
 Enable Monit by setting the following:
 
-\# You must set this variable to for monit to start  
+\# You must set this variable to for monit to start
 startup=1
 
 \#\#\# Start Monit:
@@ -306,7 +305,7 @@ startup=1
 
 -----
 
-Set Up UFW (Uncomplicated Firewall)  
+Set Up UFW (Uncomplicated Firewall)
 -----------------------------------
 
 Being a production system, you shouldn't expose any ports that aren't
@@ -319,10 +318,10 @@ Uncomplicated Firewall (UFW), a simplified front-end for iptables.
 
 \#\#\# Configure UFW:
 
-\$ sudo ufw allow 22  
-\$ sudo ufw allow 80  
-\$ sudo ufw allow 443  
-\$ sudo ufw allow 2812  
+\$ sudo ufw allow 22
+\$ sudo ufw allow 80
+\$ sudo ufw allow 443
+\$ sudo ufw allow 2812
 \$ sudo ufw default deny
 
 \#\#\# Enable UFW:
@@ -331,7 +330,7 @@ Uncomplicated Firewall (UFW), a simplified front-end for iptables.
 
 -----
 
-Set Up Unattended Upgrades  
+Set Up Unattended Upgrades
 --------------------------
 
 System updates are released frequently and while manually installing
@@ -360,36 +359,36 @@ vulnerable to attack.
 
 Edit the following:
 
-// Automatically upgrade packages from these (origin, archive) pairs  
-Unattended-Upgrade::Allowed-Origins {  
-"Ubuntu lucid-security";  
-// "Ubuntu lucid-updates";  
+// Automatically upgrade packages from these (origin, archive) pairs
+Unattended-Upgrade::Allowed-Origins {
+"Ubuntu lucid-security";
+// "Ubuntu lucid-updates";
 };
 
-// List of packages to not update  
-Unattended-Upgrade::Package-Blacklist {  
-// "vim";  
-// "libc6";  
-// "libc6-dev";  
-// "libc6-i686";  
+// List of packages to not update
+Unattended-Upgrade::Package-Blacklist {
+// "vim";
+// "libc6";
+// "libc6-dev";
+// "libc6-i686";
 };
 
-// Send email to this address for problems or packages upgrades  
-// If empty or unset then no email is sent, make sure that you  
-// have a working mail setup on your system. The package 'mailx'  
-// must be installed or anything that provides /usr/bin/mail.  
+// Send email to this address for problems or packages upgrades
+// If empty or unset then no email is sent, make sure that you
+// have a working mail setup on your system. The package 'mailx'
+// must be installed or anything that provides /usr/bin/mail.
 Unattended-Upgrade::Mail "<your_email_address>";
 
-// Do automatic removal of new unused dependencies after the upgrade  
-// (equivalent to apt-get autoremove)  
+// Do automatic removal of new unused dependencies after the upgrade
+// (equivalent to apt-get autoremove)
 //Unattended-Upgrade::Remove-Unused-Dependencies "false";
 
-// Automatically reboot \*WITHOUT CONFIRMATION\* if a  
-// the file /var/run/reboot-required is found after the upgrade  
+// Automatically reboot \*WITHOUT CONFIRMATION\* if a
+// the file /var/run/reboot-required is found after the upgrade
 Unattended-Upgrade::Automatic-Reboot "false";
 
-// Use apt bandwidth limit feature, this example limits the download  
-// speed to 1024kb/sec  
+// Use apt bandwidth limit feature, this example limits the download
+// speed to 1024kb/sec
 Acquire::http::Dl-Limit "1024";
 
 \#\#\# Enable Unattended Upgrades:
@@ -398,14 +397,14 @@ Acquire::http::Dl-Limit "1024";
 
 Modify the following:
 
-APT::Periodic::Update-Package-Lists "1";  
-APT::Periodic::Download-Upgradeable-Packages "1";  
-APT::Periodic::AutocleanInterval "5";  
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "5";
 APT::Periodic::Unattended-Upgrade "1";
 
 -----
 
-Disable Root Login via Password  
+Disable Root Login via Password
 -------------------------------
 
 One last step in securing your server is to disable logging in as root
@@ -430,7 +429,7 @@ Save and exit this file.
 
 -----
 
-Set Up SSH Key Authentication  
+Set Up SSH Key Authentication
 -----------------------------
 
 By default, your server will allow you to log in with a user name and
@@ -456,7 +455,7 @@ Now try and log into your server:
 
 \$ ssh user@example.com
 
-Install Some Other Useful Tools:  
+Install Some Other Useful Tools:
 --------------------------------
 
 \$ sudo apt-get install bwm-ng htop pastebinit whois
