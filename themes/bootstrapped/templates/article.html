@@ -32,10 +32,11 @@
 
                     <div class="post">
                         <div class="post-header">
-                            <h2 class="post-title">
-                                <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a>
-                            </h2>
+
+                            <h2 class="post-title">{{ article.title }}</h2>
+
                             <div class="post-meta">
+
                                 <span class="post-author">
                                     By
                                     {% if article.author %}
@@ -49,11 +50,12 @@
 
                                 <span class="post-categories">
                                     {% for tag in article.tags %}
-                                        <a href="#">{{ tag }}</a>
+                                        <a href="#">{{ tag }}</a> &bull;
                                     {% endfor %}
                                 </span>
 
                             </div>
+
                         </div>
 
                         <div class="post-body">
