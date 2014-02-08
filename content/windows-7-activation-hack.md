@@ -1,10 +1,9 @@
 Title: Windows 7 Activation Hack
 Date: 2011-07-19 21:18
+Author: Chris Kankiewicz
 Category: Software
 Tags: Activation, Hack, Microsoft, Regedit, Registry, Windows 7
 Slug: windows-7-activation-hack
-Author: Chris Kankiewicz
-Summary: Bypass Windows 7 activation limitations (legitimate key required)
 
 When installing Windows 7 it's very picky about which installation disc you use
 (Full vs. Upgrade) and if improperly matched with your key can prevent you from
