@@ -261,6 +261,14 @@ pre {
     padding: 12px 16px;
 }
 
+blockquote {
+    background-color: #F5F5F5;
+    border-left: 5px solid #DDD;
+    font-size: inherit;
+    margin: 10px 15px;
+    padding: 10px;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* -----| RESPONSIVE |------------------------------------------------------- */
