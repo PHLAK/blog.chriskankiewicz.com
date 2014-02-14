@@ -1,8 +1,21 @@
 <div class="sidebar-group">
-    <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search">
-        <span class="input-group-btn">
-            <button class="btn btn-primary" type="button"><i class="fa fa-search"></i></button>
-        </span>
-    </div>
+
+    <form action="#" class="site-search">
+
+        <div class="input-group">
+            <input type="text" class="search-text form-control" placeholder="Search">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
+            </span>
+        </div>
+
+    </form>
+
+    <script type="text/javascript">
+
+        // Set site URL
+        var siteURL = '{{ SITEURL }}';
+
+    </script>
+
 </div>
