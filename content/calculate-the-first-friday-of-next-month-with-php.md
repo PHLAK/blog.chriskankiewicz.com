@@ -1,108 +1,103 @@
 Title: Calculate the first Friday of next month with PHP
 Date: 2008-10-20 00:00
-Author: chris
+Author: Chris Kankiewicz
 Category: Code
 Tags: Code, First Friday, PHP, PHX2600
 Slug: calculate-the-first-friday-of-next-month-with-php
 
-\*\*UPDATE:\*\* This script has been updated, see:
+**UPDATE:** This script has been updated, see:
 [https://github.com/PHX2600/FirstFriday](https://github.com/PHX2600/FirstFriday)
 
-While developing phx2600.org, I ran into a slight dilemma. The PHX2600
-meetings occur once a month on the first Friday of every month, and we
-wanted to display that on the site. However, it was becoming a tedious
-chore to change the date once a month manually. So, being the automation
-addict I am, I thought, why not write a script. So one night I hammered
-out the following script that will calculate the first Friday of next
-month:
+While developing phx2600.org, I ran into a slight dilemma. The PHX2600 meetings
+occur once a month on the first Friday of every month, and we wanted to display
+that on the site. However, it was becoming a tedious chore to change the date
+once a month manually. So, being the automation addict I am, I thought, why not
+write a script. So one night I hammered out the following script that will
+calculate the first Friday of next month:
 
-<!--more-->
+    <?php
 
-<?php< p ?>
+        /***************************************
+         * FILENAME: first-friday.php          *
+         * AUTHOR: Chris Kankiewicz [PHLAK]    *
+         * WEBSITE: http://www.web-geek.net    *
+         ***************************************/
 
-/\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*  
-\* FILENAME: first-friday.php \*  
-\* AUTHOR: Chris Kankiewicz [PHLAK] \*  
-\* WEBSITE: http://www.web-geek.net \*  
+        // START FUNCTIONS
 
-\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*/
+        function get_day($describer,$weekday,$reference_date) { // $reference_date format = m-Y
 
-// START FUNCTIONS
+            $d = explode('-',$reference_date);
 
-function get\_day(\$describer,\$weekday,\$reference\_date) { //
-\$reference\_date format = m-Y
+            switch ($describer) {
+                case 'first': $offset = get_day_offset($reference_date,$weekday);
+                break;
+            }
 
-\$d = explode('-',\$reference\_date);
+            $r = mktime(0,0,0,$d[0],1+$offset,$d[1]);
+            return $r; //returns timestamp format
+        }
 
-switch (\$describer) {  
-case 'first': \$offset = get\_day\_offset(\$reference\_date,\$weekday);
-break;  
-}
+        function get_day_offset($anchor,$target) { //$anchor format = m-Y
 
-\$r = mktime(0,0,0,\$d[0],1+\$offset,\$d[1]);  
-return \$r; //returns timestamp format  
-}
+            $ts = explode('-',$anchor);
+            $ts = mktime(0,0,0,$ts[0],'01',$ts[1]);
 
-function get\_day\_offset(\$anchor,\$target) { //\$anchor format = m-Y
+            $anchor = date("w",$ts);
+            $target = strtolower($target);
+            $days = array(
+                'sunday'=>0,
+                'monday'=>1,
+                'tuesday'=>2,
+                'wednesday'=>3,
+                'thursday'=>4,
+                'friday'=>5,
+                'saturday'=>6
+            );
 
-\$ts = explode('-',\$anchor);  
-\$ts = mktime(0,0,0,\$ts[0],'01',\$ts[1]);
+            $offset = $days[$target] - $anchor;
 
-\$anchor = date("w",\$ts);  
-\$target = strtolower(\$target);  
-\$days = array(  
-'sunday'=\>0,  
-'monday'=\>1,  
-'tuesday'=\>2,  
-'wednesday'=\>3,  
-'thursday'=\>4,  
-'friday'=\>5,  
-'saturday'=\>6  
-);
+            if ($offset<0) $offset+=7;
 
-\$offset = \$days[\$target] - \$anchor;
+            return $offset; //returns 0-6 for use in get_day();
+        }
 
-if (\$offset\<0) \$offset+=7;
+        //END FUNCTIONS
 
-return \$offset; //returns 0-6 for use in get\_day();  
-}
+        $t = getdate(); //Get today's date
 
-//END FUNCTIONS
+        $today = date('m-Y',$t[0]); //Display today's date as MM-YYYY
 
-\$t = getdate(); //Get today's date
+        //Calculate Next Month
+        if($t[mon] == '12'){
+            $nm = '1-'.($t[year]+1);
+        } elseif($t[mday] <= '7' && $t[wday] <= '5') {
+            $nm = ($t[mon]).'-'.$t[year];
+        } else {
+            $nm = ($t[mon]+1).'-'.$t[year];
+        }
 
-\$today = date('m-Y',\$t[0]); //Display today's date as MM-YYYY
+        $date = get_day("first", "friday", $nm);
 
-//Calculate Next Month  
-if(\$t[mon] == '12'){  
-\$nm = '1-'.(\$t[year]+1);  
-} elseif(\$t[mday] \<= '7' && \$t[wday] \<= '5') {  
-\$nm = (\$t[mon]).'-'.\$t[year];  
-} else {  
-\$nm = (\$t[mon]+1).'-'.\$t[year];  
-}
+        //Checks if today is after the first friday of the month
+        if($t[mon] == date('m',$date)
+            && $t[mday] > date('j',$date)
+            && $t[mon] == '12') {
+                $nm = '1-'.($t[year]+1);
+                $ff = get_day("first", "friday", $nm);
+        } elseif($t[mon] == date('m',$date)
+            && $t[mday] > date('j',$date) && $t[mon] != '12') {
+                $nm = ($t[mon]+1).'-'.$t[year];
+                $ff = get_day("first","friday",$nm);
+        } else {
+            $ff = $date;
+        }
 
-\$date = get\_day("first", "friday", \$nm);
+        // I know this code is crap, deal with it or fix it yourself!
 
-//Checks if today is after the first friday of the month  
-if(\$t[mon] == date('m',\$date)  
-&& \$t[mday] \> date('j',\$date)  
-&& \$t[mon] == '12') {  
-\$nm = '1-'.(\$t[year]+1);  
-\$ff = get\_day("first", "friday", \$nm);  
-} elseif(\$t[mon] == date('m',\$date)  
-&& \$t[mday] \> date('j',\$date) && \$t[mon] != '12') {  
-\$nm = (\$t[mon]+1).'-'.\$t[year];  
-\$ff = get\_day("first","friday",\$nm);  
-} else {  
-\$ff = \$date;  
-}
+        echo date("F j, Y", $ff);
 
-// I know this code is crap, deal with it or fix it yourself!
+    ?>
 
-echo date("F j, Y", \$ff);
-
-?\>
-
-I apologies for the crappy code, I was either tired, drunk or both the
-night I wrote this.
+I apologies for the crappy code, I was either tired, drunk or both the night I
+wrote this.
