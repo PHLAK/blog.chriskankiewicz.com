@@ -42,11 +42,11 @@
 
                                         <span class="sep">|</span>
 
-                                        <span class="post-categories">
+                                        <ul class="post-categories">
                                             {% for tag in article.tags %}
-                                                <a href="#">{{ tag }}</a> &bull;
+                                                <li><a href="#">{{ tag }}</a></li>
                                             {% endfor %}
-                                        </span>
+                                        </ul>
 
                                     </div>
 

@@ -81,6 +81,25 @@ body {
     font-size: 11px;
 }
 
+.post-categories {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.post-categories > li {
+    display: inline-block;
+    list-style: none;
+}
+
+.post-categories > li:before {
+    content: " • ";
+}
+
+.post-categories > li:first-child:before {
+    content: none;
+}
+
 .post-body {
     color: #999;
 }

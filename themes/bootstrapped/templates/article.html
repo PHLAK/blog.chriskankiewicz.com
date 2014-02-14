@@ -48,11 +48,11 @@
 
                                 <span class="sep">|</span>
 
-                                <span class="post-categories">
+                                <ul class="post-categories list-inline">
                                     {% for tag in article.tags %}
-                                        <a href="#">{{ tag }}</a> &bull;
+                                        <li><a href="#">{{ tag }}</a></li>
                                     {% endfor %}
-                                </span>
+                                </ul>
 
                             </div>
 
@@ -95,11 +95,10 @@
                     </div>
                     {% endif %}
 
-
-
                     <div id="comments-wrapper">
                         <div id="comments"></div>
                     </div>
+
                     {{ article.metadata.googleplus_comments }}
 
                 </div>
