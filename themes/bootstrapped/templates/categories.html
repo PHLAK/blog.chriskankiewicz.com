@@ -67,6 +67,10 @@
 
     <script type="text/javascript" src="/js/global.js"></script>
 
+    {% if GOOGLE_ANALYTICS %}
+        {% include 'elements/analytics.html' %}
+    {% endif %}
+
 </body>
 
 </html>

@@ -27,6 +27,13 @@ THEME = 'themes/bootstrapped'
 
 SUMMARY_MAX_LENGTH = 80
 
+
+# Analytics
+GOOGLE_ANALYTICS = {
+    'id': 'UA-00000000-1',
+    'url': 'blog.chriskankiewicz.com'
+}
+
 # Plugins
 PLUGIN_PATH = 'plugins'
 PLUGINS = [
