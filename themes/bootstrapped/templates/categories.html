@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+
+<head>
+
+    {% include 'elements/head.html' %}
+
+</head>
+
+<body>
+
+    {% include 'elements/navbar.html' %}
+
+    <div class="content-area">
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <h1 class="page-title">Categories for {{ SITENAME }}</h1>
+
+                    <div class="categories-wrapper">
+
+                        <ul class="categories-list list-inline">
+
+                            {% for category, articles in categories|sort %}
+
+                                <li>
+                                    <a href="{{ SITEURL }}/{{ category.url }}" class="btn btn-primary btn-xs">
+                                        {{ category }} <span class="badge">{{ articles|count }}</span>
+                                    </a>
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                </div>
+
+                <div class="sidebar col-md-4">
+
+                    {% include 'elements/sidebar-header.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-search.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-recent-posts.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-links.html' %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'elements/footer.html' %}
+
+    <script type="text/javascript" src="/js/global.js"></script>
+
+</body>
+
+</html>
