@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+
+<head>
+
+    {% include 'elements/head.html' %}
+
+</head>
+
+<body>
+
+    {% include 'elements/navbar.html' %}
+
+    <div class="content-area">
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <h1 class="page-title">Archives for {{ period | reverse | join(' ') }}</h1>
+
+                    <div class="archive-wrapper">
+
+                        <div class="table-responsive">
+                            <table class="table table table-striped">
+
+                                <tbody>
+                                    {% for article in dates %}
+
+                                        <tr>
+
+                                            <td>
+                                                <small class="text-muted">{{ article.date|strftime('%b %d, %Y') }}</small>
+                                            </td>
+
+                                            <td>
+                                                <small class="text-muted">{{ article.date|strftime('%I:%M %p') }}</small>
+                                            </td>
+
+                                            <td>
+                                                <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a>
+                                            </td>
+
+                                        </tr>
+
+                                    {% endfor %}
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="sidebar col-md-4">
+
+                    {% include 'elements/sidebar-header.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-search.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-recent-posts.html' %}
+
+                    <div class="sidebar-separator"></div>
+
+                    {% include 'elements/sidebar-links.html' %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'elements/footer.html' %}
+
+    <script type="text/javascript" src="/js/global.js"></script>
+
+</body>
+
+</html>
