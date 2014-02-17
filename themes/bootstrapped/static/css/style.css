@@ -17,6 +17,7 @@ body {
 
 .page-title {
     background-color: #F5F5F5;
+    border-radius: 4px;
     color: #999;
     font-family: Arvo,serif;
     font-size: 2em;
@@ -154,8 +155,9 @@ body {
 
 .post-share-links {
     background-color: #F5F5F5;
-    padding: 10px;
+    border-radius: 4px;
     margin: 30px 0;
+    padding: 10px;
 }
 
 .post-share-links h5 {
@@ -171,6 +173,7 @@ body {
 
 .post-share-list li a {
     background-color: #999;
+    border-radius: 3px;
     color: #FFF;
     display: inline-block;
     padding: 7px 5px;
