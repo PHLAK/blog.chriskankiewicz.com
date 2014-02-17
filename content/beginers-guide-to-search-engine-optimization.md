@@ -1,7 +1,7 @@
 Title: Beginers Guide To Search Engine Optimization
 Date: 2009-11-20 00:00
 Author: Chris Kankiewicz
-Category: Web Dev
+Category: Web Development
 Tags: Google, Keywords, robots.txt, Search Engine Optimization, SEO, Sitemaps, Yahoo!
 Slug: beginers-guide-to-search-engine-optimization
 
@@ -65,7 +65,7 @@ this file upon page load:
     <link rel="stylesheet" href="style.css" type="text/css"></link>
 
 All you have to do now is add your CSS elements to this style.css file, and give
-your (X)HTML element either a class or id. For more on classes and ids, see 
+your (X)HTML element either a class or id. For more on classes and ids, see
 [http://www.w3schools.com/Css/css_syntax.asp](http://www.w3schools.com/Css/css_syntax.asp).
 
 ## Use Human Readable URL's
@@ -76,12 +76,12 @@ also a good SEO technique. See below for an example of human readable URL's.
 
 Good Examples:
 
-  * www.domain.com/dog-food  
+  * www.domain.com/dog-food
   * www.domain.com/dog/food
 
 Poor Examples:
 
-  * www.domain.com/1337  
+  * www.domain.com/1337
   * www.domain.com/index.php?page=1337
 
 ## Page Title Format
@@ -95,14 +95,14 @@ readers have a tougher time identifying the page.
 
 Good examples:
 
-  * SEO Guide | Web Geek  
-  * CK-Gallery • Web Geek  
+  * SEO Guide | Web Geek
+  * CK-Gallery • Web Geek
   * Menu – Taco Bell
 
 Poor examples:
 
-  * Web Geek | SEO Guide  
-  * Web Geek > Web Development > SEO Guide  
+  * Web Geek | SEO Guide
+  * Web Geek > Web Development > SEO Guide
   * www.web-geek.net | projects | php | ck-gallery
 
 ## Header Tag Prioritization

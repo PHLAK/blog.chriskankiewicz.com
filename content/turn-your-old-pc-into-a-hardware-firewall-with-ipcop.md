@@ -1,7 +1,7 @@
 Title: Turn your old PC into a hardware firewall with IPCop
 Date: 2008-10-02 22:18
 Author: Chris Kankiewicz
-Category: Hardware, Software
+Category: Hardware
 Tags: CDBurnerXP, Firewall, Hardware, IPCop, Linux, PC, Software, Systm
 Slug: turn-your-old-pc-into-a-hardware-firewall-with-ipcop
 

@@ -1,7 +1,7 @@
 Title: Search Engine Optimization Tips
 Date: 2010-04-14 00:00
 Author: Chris Kankiewicz
-Category: Web Dev
+Category: Web Development
 Tags: HTML, Search Engine Optimization, SEO
 Slug: search-engine-optimization-tips
 
@@ -74,7 +74,7 @@ ranking.
 
 ### Other SEO Tips to consider
 
-  1. Use SEO Friendly URLs. (ie – yourdomain.com/spacelys-sprockets.htm)  
+  1. Use SEO Friendly URLs. (ie – yourdomain.com/spacelys-sprockets.htm)
 
   2. Every website should have a sitemap, but not rely on it. A search engine
      should be able to find every page on its own.

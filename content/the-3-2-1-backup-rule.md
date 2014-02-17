@@ -1,8 +1,8 @@
 Title: The 3-2-1 Backup Rule
 Date: 2011-07-13 14:29
 Author: Chris Kankiewicz
-Category: Uncategorized
-Tags: 3-2-1 Rule, Backup, CrashPlan
+Category: Miscellaneous
+Tags: Backup, CrashPlan
 Slug: the-3-2-1-backup-rule
 
 Too many people today don't backup their files. And of those that do, many don't
@@ -12,7 +12,7 @@ do it well. An easy way to remember a "safe" way to backup your data is with the
   * Keep **3 copies** of any important files (your primary/working copy counts
     as one)
   * Store your files on **2 different media types** (Example: Hard drive and in
-    the Cloud)  
+    the Cloud)
   * Always have **1 copy off site**
 
 With the 3-2-1 rule you can be relatively confident that you'll always be able
