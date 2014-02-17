@@ -158,6 +158,40 @@ body {
     margin: 30px 0;
 }
 
+.post-share-links h5 {
+    display: inline-block;
+    margin: 0;
+    padding: 7px 5px 7px 0;
+}
+
+.post-share-list {
+    display: inline-block;
+    margin-bottom: 0;
+}
+
+.post-share-list li a {
+    background-color: #999;
+    color: #FFF;
+    display: inline-block;
+    padding: 7px 5px;
+}
+
+.post-share-list li a.post-share-google-plus {
+    background-color: #D34836;
+}
+
+.post-share-list li a.post-share-twitter {
+    background-color: #4099FF;
+}
+
+.post-share-list li a.post-share-facebook {
+    background-color: #3B5998;
+}
+
+.post-share-list li a.post-share-email: {
+    background-color: #555;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* -----| CONTENT |---------------------------------------------------------- */
