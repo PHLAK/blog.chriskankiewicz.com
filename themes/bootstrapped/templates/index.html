@@ -44,7 +44,7 @@
 
                                         <ul class="post-categories">
                                             {% for tag in article.tags %}
-                                                <li><a href="#">{{ tag }}</a></li>
+                                                <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
                                             {% endfor %}
                                         </ul>
 
