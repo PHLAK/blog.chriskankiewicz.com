@@ -5,6 +5,20 @@
             <a class="navbar-brand" href="{{ SITEURL }}">{{ SITENAME }}</a>
         </div>
 
+        {% if DISPLAY_PAGES_ON_MENU %}
+            {% if PAGES %}
+                <ul class="nav navbar-nav">
+
+                    {% for p in PAGES %}
+                        <li {% if p == page %}class="active"{% endif %}>
+                            <a href="{{ SITEURL }}/{{ p.url }}">{{ p.title }}</a>
+                        </li>
+                    {% endfor %}
+
+                </ul>
+            {% endif %}
+        {% endif %}
+
         <div class="navbar-right">
 
             <ul class="nav navbar-nav">
