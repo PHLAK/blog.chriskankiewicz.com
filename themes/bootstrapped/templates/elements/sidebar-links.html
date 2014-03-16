@@ -1,15 +1,19 @@
-<div class="panel panel-default">
+{% if LINKS %}
 
-    <div class="panel-heading">
-        Links
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled">
+                {% for title, url in LINKS %}
+                    <li><a href="{{ url }}">{{ title }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
     </div>
 
-    <div class="panel-body">
-        <ul class="links sidebar-list list-unstyled">
-            <li><a href="#">Random Link One</a></li>
-            <li><a href="#">Random Link Two</a></li>
-            <li><a href="#">Random Link Three</a></li>
-        </ul>
-    </div>
-
-</div>
+{% endif %}
