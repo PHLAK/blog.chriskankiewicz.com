@@ -28,90 +28,94 @@
 
             <div class="row">
 
-                <div class="posts-wrapper col-md-8">
+                <div class="col-md-8">
 
-                    <div class="post">
-                        <div class="post-header">
+                    <div class="posts-wrapper">
 
-                            <h2 class="post-title">{{ article.title }}</h2>
+                        <div class="post">
+                            <div class="post-header">
 
-                            <div class="post-meta">
+                                <h2 class="post-title">{{ article.title }}</h2>
 
-                                <span class="post-author">
-                                    By
-                                    {% if article.author %}
-                                        <a href="{{ SITEURL }}/{{ article.author.url }}">{{ article.author }}</a>
-                                    {% else %}
-                                        Anonymous
-                                    {% endif %}
-                                </span>
+                                <div class="post-meta">
 
-                                <span class="sep">|</span>
+                                    <span class="post-author">
+                                        By
+                                        {% if article.author %}
+                                            <a href="{{ SITEURL }}/{{ article.author.url }}">{{ article.author }}</a>
+                                        {% else %}
+                                            Anonymous
+                                        {% endif %}
+                                    </span>
 
-                                <ul class="post-categories">
-                                    {% for tag in article.tags %}
-                                        <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
-                                    {% endfor %}
-                                </ul>
+                                    <span class="sep">|</span>
 
+                                    <ul class="post-categories">
+                                        {% for tag in article.tags %}
+                                            <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                {{ article.content }}
+
+                            </div>
+
+                            <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
+                                <div class="month">{{ article.date|strftime('%b') }}</div>
+                                <div class="day">{{ article.date|strftime('%d') }}</div>
                             </div>
 
                         </div>
 
-                        <div class="post-body">
+                        {% if article.share_post and article.status != 'draft' %}
+                            <div class="post-share-links">
 
-                            {{ article.content }}
+                                <h5>Share this:</h5>
 
+                                <ul class="post-share-list list-inline">
+
+                                    <li>
+                                        <a href="{{article.share_post['google-plus']}}" class="post-share-google-plus" target="_blank" rel="tooltip" title="Google+">
+                                            <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="{{article.share_post['twitter']}}" class="post-share-twitter" target="_blank" rel="tooltip" title="Twitter">
+                                            <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="{{article.share_post['facebook']}}" class="post-share-facebook" target="_blank" rel="tooltip" title="Facebook">
+                                            <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="{{article.share_post['email']}}" class="post-share-email" target="_blank" rel="tooltip" title="Email">
+                                            <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                        </a>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+                        {% endif %}
+
+                        <div id="comments-wrapper">
+                            <div id="comments"></div>
                         </div>
 
-                        <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
-                            <div class="month">{{ article.date|strftime('%b') }}</div>
-                            <div class="day">{{ article.date|strftime('%d') }}</div>
-                        </div>
+                        {{ article.metadata.googleplus_comments }}
 
                     </div>
-
-                    {% if article.share_post and article.status != 'draft' %}
-                        <div class="post-share-links">
-
-                            <h5>Share this:</h5>
-
-                            <ul class="post-share-list list-inline">
-
-                                <li>
-                                    <a href="{{article.share_post['google-plus']}}" class="post-share-google-plus" target="_blank" rel="tooltip" title="Google+">
-                                        <i class="fa fa-google-plus fa-lg fa-fw"></i>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{article.share_post['twitter']}}" class="post-share-twitter" target="_blank" rel="tooltip" title="Twitter">
-                                        <i class="fa fa-twitter fa-lg fa-fw"></i>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{article.share_post['facebook']}}" class="post-share-facebook" target="_blank" rel="tooltip" title="Facebook">
-                                        <i class="fa fa-facebook fa-lg fa-fw"></i>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{article.share_post['email']}}" class="post-share-email" target="_blank" rel="tooltip" title="Email">
-                                        <i class="fa fa-envelope fa-lg fa-fw"></i>
-                                    </a>
-                                </li>
-
-                            </ul>
-
-                        </div>
-                    {% endif %}
-
-                    <div id="comments-wrapper">
-                        <div id="comments"></div>
-                    </div>
-
-                    {{ article.metadata.googleplus_comments }}
 
                 </div>
 
