@@ -30,6 +30,17 @@ body {
 /* -----| NAVIGATION |------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
+.title-img {
+    position: relative;
+    margin-right: -100%;
+    top: -20px;
+    width: 60px;
+}
+
+.site-title {
+    margin-left: 75px;
+}
+
 .site-nav {
     border: none;
     margin: 0;
