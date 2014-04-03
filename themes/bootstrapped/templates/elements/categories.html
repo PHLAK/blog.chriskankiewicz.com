@@ -1,0 +1,17 @@
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Categories
+    </div>
+
+    <div class="panel-body">
+        <ul class="links sidebar-list list-unstyled">
+            {% for cat, null in categories %}
+                <li {% if cat == category %} class="active"{% endif %}>
+                    <a href="{{ SITEURL }}/{{ cat.url }}">{{ cat }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>

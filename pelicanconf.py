@@ -27,6 +27,8 @@ THEME = 'themes/bootstrapped'
 
 SUMMARY_MAX_LENGTH = 80
 
+# Code formatting
+# PYGMENTS_RST_OPTIONS = {'classprefix': 'pgcss', 'linenos': 'table'}
 
 # Analytics
 GOOGLE_ANALYTICS = {
@@ -72,11 +74,12 @@ LINKS =  (
 SOCIAL = (
     ('Google+', 'https://plus.google.com/+ChrisKankiewicz'),
     ('Twitter', 'https://twitter.com/PHLAK'),
-    ('GitHub', 'https://github.com/PHLAK')
+    ('GitHub', 'https://github.com/PHLAK'),
+    ('KeyBase', 'https://keybase.io/chriskankiewicz')
 )
 
 # Pagination
-DEFAULT_PAGINATION = 10
+DEFAULT_PAGINATION = 5
 
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True

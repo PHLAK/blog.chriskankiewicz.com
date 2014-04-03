@@ -1,0 +1,19 @@
+{% if SOCIAL %}
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled">
+                {% for title, url in SOCIAL %}
+                    <li><a href="{{ url }}">{{ title }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+
+{% endif %}

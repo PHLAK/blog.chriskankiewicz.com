@@ -26,11 +26,10 @@
     <div class="content-area">
         <div class="container">
 
-            <div class="row">
+            <div class="post-wrapper">
+                <div class="row">
 
-                <div class="col-md-8">
-
-                    <div class="posts-wrapper">
+                    <div class="col-md-10 col-md-offset-1">
 
                         <div class="post">
                             <div class="post-header">
@@ -116,37 +115,32 @@
                         {{ article.metadata.googleplus_comments }}
 
                     </div>
-
                 </div>
 
-                <div class="sidebar col-md-4">
+            </div>
 
-                    {% include 'elements/sidebar-search.html' %}
+            <div class="page-footer">
+                <div class="row">
 
-                    {% if article.related_posts %}
+                    <div class="col-md-4">
+                        {% include 'elements/related-posts.html' %}
+                    </div>
 
-                        <div class="sidebar-separator"></div>
+                    <div class="col-md-4">
+                        {% include 'elements/categories.html' %}
+                    </div>
 
-                        {% include 'elements/sidebar-related-posts.html' %}
-
-                    {% endif %}
-
-                    <div class="sidebar-separator"></div>
-
-                    {% include 'elements/sidebar-recent-posts.html' %}
-
-                    <div class="sidebar-separator"></div>
-
-                    {% include 'elements/sidebar-links.html' %}
+                    <div class="col-md-4">
+                        {% include 'elements/social.html' %}
+                    </div>
 
                 </div>
-
             </div>
 
         </div>
     </div>
 
-    {% include 'elements/footer.html' %}
+    {% include 'elements/site-footer.html' %}
 
     <script type="text/javascript" src="/js/global.js"></script>
 

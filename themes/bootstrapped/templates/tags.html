@@ -14,20 +14,19 @@
     <div class="content-area">
         <div class="container">
 
-            <div class="row">
+            <div class="tags-wrapper">
+                <div class="row">
 
-                <div class="col-md-8">
+                    <div class="col-md-10 col-md-offset-1">
 
-                    <h1 class="page-title">Tags for {{ SITENAME }}</h1>
+                        <h1 class="page-title">Tags for {{ SITENAME }}</h1>
 
-                    <div class="tags-wrapper">
-
-                        <ul class="tags-list list-inline">
+                        <ul class="tags-list list-inline text-justify">
 
                             {% for tag, articles in tags|sort %}
 
                                 <li>
-                                    <a href="{{ SITEURL }}/{{ tag.url }}" class="btn btn-primary btn-xs">
+                                    <a href="{{ SITEURL }}/{{ tag.url }}" class="btn btn-primary btn-sm">
                                         {{ tag }} <span class="badge">{{ articles|count }}</span>
                                     </a>
                                 </li>
@@ -39,27 +38,30 @@
                     </div>
 
                 </div>
+            </div>
 
-                <div class="sidebar col-md-4">
+            <div class="page-footer">
+                <div class="row">
 
-                    {% include 'elements/sidebar-search.html' %}
+                    <div class="col-md-4">
+                        {% include 'elements/categories.html' %}
+                    </div>
 
-                    <div class="sidebar-separator"></div>
+                    <div class="col-md-4">
+                        {% include 'elements/links.html' %}
+                    </div>
 
-                    {% include 'elements/sidebar-recent-posts.html' %}
-
-                    <div class="sidebar-separator"></div>
-
-                    {% include 'elements/sidebar-links.html' %}
+                    <div class="col-md-4">
+                        {% include 'elements/social.html' %}
+                    </div>
 
                 </div>
-
             </div>
 
         </div>
     </div>
 
-    {% include 'elements/footer.html' %}
+    {% include 'elements/site-footer.html' %}
 
     <script type="text/javascript" src="/js/global.js"></script>
 
