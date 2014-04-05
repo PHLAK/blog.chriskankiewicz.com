@@ -22,50 +22,7 @@
                         <h1 class="page-title">Articles by {{ author }}</h1>
 
                         {% for article in articles_page.object_list %}
-
-                            <div class="post">
-                                <div class="post-header">
-
-                                    <h2 class="post-title">
-                                        <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a>
-                                    </h2>
-
-                                    <div class="post-meta">
-
-                                        <span class="post-author">
-                                            By
-                                            {% if article.author %}
-                                                <a href="{{ SITEURL }}/{{ article.author.url }}">{{ article.author }}</a>
-                                            {% else %}
-                                                Anonymous
-                                            {% endif %}
-                                        </span>
-
-                                        <span class="sep">|</span>
-
-                                        <ul class="post-categories">
-                                            {% for tag in article.tags %}
-                                                <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
-                                            {% endfor %}
-                                        </ul>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="post-body">
-
-                                    {{ article.summary }}
-
-                                </div>
-
-                                <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
-                                    <div class="month">{{ article.date|strftime('%b') }}</div>
-                                    <div class="day">{{ article.date|strftime('%d') }}</div>
-                                </div>
-
-                            </div>
-
+                            {% include 'elements/post.html' %}
                         {% endfor %}
 
                     </div>

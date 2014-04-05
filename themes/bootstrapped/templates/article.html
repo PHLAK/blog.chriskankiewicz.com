@@ -38,6 +38,11 @@
 
                                 <div class="post-meta">
 
+                                    <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
+                                        <div class="month">{{ article.date|strftime('%b') }}</div>
+                                        <div class="day">{{ article.date|strftime('%d') }}</div>
+                                    </div>
+
                                     <span class="post-author">
                                         By
                                         {% if article.author %}
@@ -63,11 +68,6 @@
 
                                 {{ article.content }}
 
-                            </div>
-
-                            <div class="post-date" title="{{ article.date|strftime('%B %d, %Y - %I:%M %p') }}">
-                                <div class="month">{{ article.date|strftime('%b') }}</div>
-                                <div class="day">{{ article.date|strftime('%d') }}</div>
                             </div>
 
                         </div>
