@@ -158,46 +158,28 @@ body {
     font-weight: bold;
 }
 
-.post-share-links {
-    background-color: #F5F5F5;
-    border-radius: 4px;
-    margin: 30px 0;
-    padding: 10px;
+.post-feedback {
+    overflow: hidden;
 }
 
-.post-share-links h5 {
-    display: inline-block;
-    margin: 0;
-    padding: 7px 5px 7px 0;
-}
-
-.post-share-list {
-    display: inline-block;
-    margin-bottom: 0;
-}
-
-.post-share-list li a {
-    background-color: #999;
-    border-radius: 3px;
-    color: #FFF;
-    display: inline-block;
-    padding: 7px 5px;
-}
-
-.post-share-list li a.post-share-google-plus {
+.post-share-list li a.post-share-google-plus:hover {
     background-color: #D34836;
+    color: #FFF;
 }
 
-.post-share-list li a.post-share-twitter {
+.post-share-list li a.post-share-twitter:hover {
     background-color: #4099FF;
+    color: #FFF;
 }
 
-.post-share-list li a.post-share-facebook {
+.post-share-list li a.post-share-facebook:hover {
     background-color: #3B5998;
+    color: #FFF;
 }
 
-.post-share-list li a.post-share-email: {
+.post-share-list li a.post-share-email:hover {
     background-color: #555;
+    color: #FFF;
 }
 
 

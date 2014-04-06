@@ -72,47 +72,51 @@
 
                         </div>
 
-                        {% if article.share_post and article.status != 'draft' %}
-                            <div class="post-share-links">
+                        <div class="post-feedback navbar navbar-default">
 
-                                <h5>Share this:</h5>
-
-                                <ul class="post-share-list list-inline">
-
-                                    <li>
-                                        <a href="{{article.share_post['google-plus']}}" class="post-share-google-plus" target="_blank" rel="tooltip" title="Google+">
-                                            <i class="fa fa-google-plus fa-lg fa-fw"></i>
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a href="{{article.share_post['twitter']}}" class="post-share-twitter" target="_blank" rel="tooltip" title="Twitter">
-                                            <i class="fa fa-twitter fa-lg fa-fw"></i>
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a href="{{article.share_post['facebook']}}" class="post-share-facebook" target="_blank" rel="tooltip" title="Facebook">
-                                            <i class="fa fa-facebook fa-lg fa-fw"></i>
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a href="{{article.share_post['email']}}" class="post-share-email" target="_blank" rel="tooltip" title="Email">
-                                            <i class="fa fa-envelope fa-lg fa-fw"></i>
-                                        </a>
-                                    </li>
-
-                                </ul>
-
+                            <div class="navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
                             </div>
-                        {% endif %}
 
-                        <div id="comments-wrapper">
-                            <div id="comments"></div>
+                            {% if article.share_post and article.status != 'draft' %}
+                                <div class="navbar-right">
+
+                                    <div class="navbar-text">Share this:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="{{article.share_post['google-plus']}}" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{article.share_post['twitter']}}" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{article.share_post['facebook']}}" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{article.share_post['email']}}" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+                            {% endif %}
+
                         </div>
-
-                        {{ article.metadata.googleplus_comments }}
 
                     </div>
                 </div>

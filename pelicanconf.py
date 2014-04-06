@@ -32,14 +32,13 @@ SUMMARY_MAX_LENGTH = 80
 
 # Analytics
 GOOGLE_ANALYTICS = {
-    'id': 'UA-00000000-1',
+    'id':  'UA-00000000-1',
     'url': 'blog.chriskankiewicz.com'
 }
 
 # Plugins
 PLUGIN_PATH = 'plugins'
 PLUGINS = [
-    'googleplus_comments',
     'gravatar',
     'related_posts',
     'share_post',
@@ -65,7 +64,7 @@ SITEMAP = {
 # STATIC_PATHS = ['images']
 
 # Blogroll
-LINKS =  (
+LINKS = (
     ('Pelican', 'http://getpelican.com/'),
     ('Python.org', 'http://python.org/')
 )
