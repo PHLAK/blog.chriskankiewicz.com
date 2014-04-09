@@ -63,13 +63,15 @@ SITEMAP = {
 # Static Paths
 # STATIC_PATHS = ['images']
 
-# Blogroll
+# Custom Links
 LINKS = (
-    ('Pelican', 'http://getpelican.com/'),
-    ('Python.org', 'http://python.org/')
+    ('ChrisKankiewicz.com', 'https://chriskankiewicz.com'),
+    ('UberGallery', 'http://www.ubergallery.net'),
+    ('Directory Lister', 'http://www.directorylister.com'),
+    ('jColorClock', 'http://phlak.github.io/jColorClock/')
 )
 
-# Social widget
+# Social Links
 SOCIAL = (
     ('Google+', 'https://plus.google.com/+ChrisKankiewicz'),
     ('Twitter', 'https://twitter.com/PHLAK'),
