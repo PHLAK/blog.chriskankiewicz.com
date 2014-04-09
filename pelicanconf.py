@@ -25,6 +25,9 @@ TRANSLATION_FEED_ATOM = None
 # Theming
 THEME = 'themes/bootstrapped'
 
+# Tag cloud options
+TAG_CLOUD_MAX_ITEMS = 24
+
 SUMMARY_MAX_LENGTH = 80
 
 # Code formatting
