@@ -9,15 +9,20 @@ Getting Started
 
 ##### Install Pelican for Editing Content
 
-    $ sudo pip install pelican markdown
+    $ sudo pip install pelican markdown beautifulsoup4
+
+##### Clone the Blog
+
+    $ git clone git@github.com:PHLAK/blog.chriskankiewicz.com.git
 
 ##### Generatiing Content
 
-    $ pelican /path/to/content
+    $ cd /path/to/blog.chriskankiewicz.com
+    $ make html
 
 -----
 
-**Copyright (c) 2013 Chris Kankewicz <Chris@ChrisKankiewicz.com>**
+**Copyright (c) 2014 Chris Kankewicz <Chris@ChrisKankiewicz.com>**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
