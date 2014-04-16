@@ -11,10 +11,6 @@ body {
     margin: 60px 0;
 }
 
-/*a, a:visited{
-    transition: all 0.15s linear 0s;
-}*/
-
 .page-title {
     background-color: #F5F5F5;
     border-radius: 4px;
@@ -25,6 +21,9 @@ body {
     margin: 0 0 60px;
 }
 
+p, h1, .h1, h2, .h2, h3, .h3, pre {
+    margin-bottom: 15px;
+}
 
 /* -------------------------------------------------------------------------- */
 /* -----| NAVIGATION |------------------------------------------------------- */
