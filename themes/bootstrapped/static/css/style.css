@@ -344,6 +344,14 @@ blockquote {
 /* -----| RESPONSIVE |------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
+@media (max-width: 767px) {
+
+    .rss-feed .visible-xs {
+        display: inline-block !important;
+    }
+
+}
+
 @media (max-width: 720px) {
 
     .post {
