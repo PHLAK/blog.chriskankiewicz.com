@@ -108,17 +108,17 @@ p, h1, .h1, h2, .h2, h3, .h3, pre {
 
 .post-body {
     color: #999;
-    font-size: 1.25em;
+    font-size: 1.15em;
 }
 
 .post-body h2 {
     font-family: Arvo, serif;
-    font-size: 1.5em;
+    font-size: 1.45em;
 }
 
 .post-body h3 {
     font-family: Arvo, serif;
-    font-size: 1.25em;
+    font-size: 1.15em;
 }
 
 .post-body h4 {
@@ -287,7 +287,7 @@ p, h1, .h1, h2, .h2, h3, .h3, pre {
 
 .page-footer {
     border-top: 1px dashed #E3E3E3;
-    padding: 30px 0;
+    padding: 30px 0 0;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -322,7 +322,7 @@ pre {
     background-color: #333;
     border: none;
     color: #FFF;
-    font-size: 16px;
+    font-size: 15px;
     overflow: auto;
     padding: 12px 16px;
 }
@@ -357,6 +357,10 @@ blockquote {
 }
 
 @media (max-width: 720px) {
+
+    .content-area {
+        margin: 30px 0;
+    }
 
     .post {
         margin-left: 0;
