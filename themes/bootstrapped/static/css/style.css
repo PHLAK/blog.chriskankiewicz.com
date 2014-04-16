@@ -87,22 +87,23 @@ p, h1, .h1, h2, .h2, h3, .h3, pre {
     margin-top: 5px;
 }
 
-.post-categories {
+.post-tags {
     display: inline-block;
     margin: 0;
     padding: 0;
 }
 
-.post-categories > li {
+.post-tags > li {
     display: inline-block;
     list-style: none;
 }
 
-.post-categories > li:before {
+.post-tags > li:after {
     content: " • ";
 }
 
-.post-categories > li:first-child:before {
+.post-tags > li:first-child:after,
+.post-tags > li:last-child:after {
     content: none;
 }
 
@@ -414,7 +415,7 @@ blockquote {
         display: none;
     }
 
-    .post-meta .post-categories {
+    .post-meta .post-tags {
         display: block;
         margin: 8px 0 0;
     }

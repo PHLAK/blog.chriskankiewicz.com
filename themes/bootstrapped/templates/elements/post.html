@@ -23,7 +23,8 @@
 
             <span class="sep">|</span>
 
-            <ul class="post-categories">
+            <ul class="post-tags">
+                <li class="tags-icon"><i class="fa fa-tags"></i></li>
                 {% for tag in article.tags %}
                     <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a></li>
                 {% endfor %}
