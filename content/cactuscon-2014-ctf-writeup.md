@@ -38,9 +38,9 @@ Ah-ha! [robots.txt](http://www.robotstxt.org/robotstxt.html)... By checking
 
 Here we find mention of `/secret_docs/file-tree.txt` with a rule of "Disallow".
 Fortunately, this rule is only intended to be read by web-crawlers and has no
-actual affect on our ability to read the file.  By visiting `/secret_docs/file-
-tree.txt` we find [this](https://raw.githubusercontent.com/PHX2600/spookileaks/m
-aster/webroot/secret_docs/file-tree.txt).
+actual affect on our ability to read the file.  By visiting
+`/secret_docs/file-tree.txt` we find
+[this](https://raw.githubusercontent.com/PHX2600/spookileaks/master/webroot/secret_docs/file-tree.txt).
 
 Score! We just found a complete listing of the application file structure.  It's
 a pretty long list of files but there's a few things worth noting:
@@ -51,24 +51,24 @@ a pretty long list of files but there's a few things worth noting:
     way user account passwords are hashed.
 
   * `webroot/uploads/` - This is where user files are uploaded to, indicated by
-    '[ User uploads ]'. This means any files uploaded to the server will be
+    `[ User uploads ]`. This means any files uploaded to the server will be
     publicly accessable.
 
 ### The Application
 
-Okay we have now exposed a lot of information about our application but we still
+We have now exposed a lot of information about our application but we still
 don't have a vector of attack.  Let's start assessing the functionality of the
 app.
 
 We'll start by registering an account (any user/pass will do).  Once registered
-we seem to gain the ability to add an image from the `/images/manage` page.  On
-first pass let's just use the app as intended.  Add a title, select an image
-(with proper extension type) from our computer and add a comment.  Upload the
-image and we now see it appear on the left hand side of the page.  Nothing
-terribly interesting yet.  Now, by viewing the source of the manage page a few
-things should catch your eye:
+we gain the ability to add an image from the `/images/manage` page.  On first
+pass let's just use the app as intended.  Add a title, select an image (with
+proper extension type) from our computer and add a comment.  Submit the form and
+we now see our image on the left hand side of the page.  Nothing terribly
+interesting yet.  Let's see what this form is actually doing.  By viewing the
+source of the `/images/manage` page a few things should catch our eye:
 
-  * There's an hidden field in the image submission form referencing an unknown
+  * There's an hidden field in the image submission form referencing a
     `file_hash`.
 
   * This page loads a `/js/images.js` script that isn't seen on other pages.
@@ -76,7 +76,7 @@ things should catch your eye:
   * The images on this page are loaded via a URL parameter:
     `/images/media?file=image_name.jpg`
 
-Upon inspection of `images.js` we find the following:
+Upon inspection of `/js/images.js` we find the following:
 
     $('.image-file-upload-input:file').change(function(event) {
 
@@ -100,17 +100,16 @@ Upon inspection of `images.js` we find the following:
     });
 
 This is pretty straight forward.  On selection of a file for uploading, a post
-request is made to `/images/hash` containing the file name in the post data.
-The returned data is then set as the value of the hidden `file_hash` field and
-this gets sent to the server with the form on submission.  By using Firebug or
-the browsers buit-in developer tools we can see the request being made on file
+request is made to `/images/hash` containing the file name in the post data. The
+returned data is then set as the value of the hidden `file_hash` field and this
+gets sent to the server with the form on submission.  By using Firebug or the
+browsers buit-in developer tools we can see the request being made on file
 selection and the data returned.  The data we get back from the jQuery post
-appears to be a sha1 hash. With some additional analysis you and playing with
-the form and the hashing function we can tell that the hash generated isn't a
-direct sha1 of the file name.  Also, if we modify the hash after generation the
-file upload form fails to post any data.  Lastly, attempting to upload a file
-with an extension other than those listed as acceptable fails upon submission as
-well.
+appears to be a sha1 hash. With some additional analysis and playing with the
+form and the hashing function we can tell that the hash generated isn't a direct
+sha1 of the file name.  Also, if we modify the hash after generation the file
+upload form fails to post any data.  Lastly, attempting to upload a file with an
+extension other than those listed as acceptable fails upon submission as well.
 
 Let's move on for now and look at the suspicious file loading URL.  Whenever a
 file is loaded via URL parameters there's a good chance it's vulnerable to a
@@ -122,13 +121,15 @@ try a basic attack:
 This results in an error: `File "etc/passwd" Not Found`.  It's important to note
 that the returned error does not contain any dot-dot-slashes.  This means
 they're sanitizing this value but there's still a chance it might not be
-sanitized properly.  After trying various common path traversal attacks you will
-find that the file parameter is vulnerable via the double dot-dot-slash string:
-`....//` and we can view the /etc/passwd file with the following URL:
+sanitized properly.  Knowing the input and output of this unkown function we can
+make a guess as to what it's doing internally and exploid that.  In this case, a
+good guess is that they are replacing all instanced of `../` with nothing. We
+can test that out by submitting `....//`.  If we're right the inner `../` will
+be replaced with nothing leaving a single `../` in it's place.  Let's test that:
 
     /images/media?file=....//....//....//....//....//etc/passwd
 
-Okay, let's try grabbing that flag we saw in the file tree from earlier:
+It works! Let's try grabbing that flag we saw in the file tree from earlier:
 
     /images/media?file=....//....//Docs/flag.txt
 
@@ -139,30 +140,33 @@ user with permission (root perhpse?).
 
 ### Reconnaissance
 
-At this point we have everything we need to start gathering intel.  To save some
-time, I'll now go over some of the key files your investigation should have
-turned up and their significance:
+At this point we have everything we need to start gathering intel.  The path
+traversal attack plus the file tree give us access to the complete source code
+of the application as well any other files on the server with laxed permissions.
+To save some time, I'll now go over some of the key files our investigation
+should have turned up and their significance:
 
-First, in `/etc/passwd` you will find the user "ghost":
+First, in the `/etc/passwd` file we tried above we find the "ghost" user:
 
     ghost:x:1000:1000:ghost,,,:/home/ghost:/bin/bash
 
-This, along with the contents of `/etc/group` let us know the ghost user has
-sudo access:
+This, along with the contents of `/etc/group` let us know the "ghost" account
+has sudo access:
 
     sudo:x:27:ghost
 
-So, if we can gain access to the "ghost" user account we can read the contents
+Thus, if we can gain access to the "ghost" user account we can read the contents
 of flag.txt.
 
 Okay, let's go back to the image submission form, specifically, the hidden
 `file_hash` form field. By viewing the source of the ImagesController at
-`/images/media?file=....//....//Controller/ImagesController.php` we can now see
-that this hash is checked against a hash of the file name:
+`/images/media?file=....//....//Controller/ImagesController.php` we see that
+this hash is checked against a hash of the submitted file's name:
 
     if (!$file['error'] && $hash === $this->hashFile($file['name'])) {
 
-Looking at the he main hash action we see a check against the file's extension:
+Looking at the main `/images/hash` action we see a check against the file's
+extension:
 
     // Get the file name
     $fileName = trim($this->request->data['fileName']);
@@ -186,7 +190,7 @@ Looking at the he main hash action we see a check against the file's extension:
 
     }
 
-And viewing the hashFile() function we see the following:
+And viewing the referenced hashFile() function we see the following:
 
     private function hashFile($fileName) {
 
@@ -196,8 +200,9 @@ And viewing the hashFile() function we see the following:
     }
 
 That's a bingo! We now have the method of file hashing along with the secret
-string concatenated with the file name.  With this information we can actively
-exploit the file upload form and generate a valid hash for any file we choose.
+string that gets concatenated with the file name.  With this information we can
+actively exploit the file upload form and generate a valid hash for any file we
+choose.
 
 ### Shelling the Server
 
@@ -216,12 +221,12 @@ This gives us:
 Now we can go back to the upload form, select our `c99.php` file, then using
 Firebug or the browsers built-in web developer tools modify the value of the
 hidden `file_hash` element and set it to our pre-generated hash.  This time,
-when we submit the form the file upload succeeds without error.  Navigating to
+when we submit the form, the file upload succeeds without error.  Navigating to
 `/uploads/not_a_shell.php` now brings up our shell.
 
 From here accessing any aspect of the web application or it's database are
-trivial.  Let's investigate the database now.  First, let's nab the credentials
-by navigating to `/images/media?file=....//....//Config/database.php`:
+trivial.  Let's investigate the database now.  First, nab the credentials by
+navigating to `/images/media?file=....//....//Config/database.php`:
 
     public $default = array(
         'datasource' => 'Database/Mysql',
@@ -251,23 +256,40 @@ custom password hasher at
 
     }
 
-Yup, unsalted md5.  At this point we might start thinking about brute forcing
-the password but the md5 hash space has been known to be weak for some time now,
-many of the hashes have already been calculated for us, a simple
+Yup, unsalted md5.  If the password was salted we might start thinking about
+brute forcing it.  However, unsalted passwords are often easily searchable due
+to them being pre-computed en masse and published online.  For our case, a
+simple
 [Google search](https://encrypted.google.com/search?q=37988bb25d36058671f959f06a7d51b9)
 reveals the password as `ScoobySnacks`.
 
-### The Final Piece
+### The Final Pieces
 
-The last question remaining is wether or not the `ghost` user was smart enough
-to use different passwords for his system account and his web application
-accounts.  All we have to do to test this is SSH into the server with his
-credentials:
+We now need to be able to log in to the the system.  Without physical access to
+the box we can perform an [nmap](http://nmap.org/) scan to see what services are
+up and running:
+
+    $ nmap -sT 192.168.0.170
+
+    Starting Nmap 6.40 ( http://nmap.org ) at 2014-04-16 10:48 MST
+    Nmap scan report for 192.168.0.170
+    Host is up (0.0034s latency).
+    Not shown: 998 closed ports
+    PORT   STATE SERVICE
+    22/tcp open  ssh
+    80/tcp open  http
+
+    Nmap done: 1 IP address (1 host up) scanned in 0.09 seconds
+
+Here we see that SSH is running on the target machine.  The last question
+remaining now is wether or not the `ghost` user was smart enough to use
+different passwords for his system account and his web application accounts.
+All we have to do to test this is SSH into the server with his credentials:
 
     $ ssh ghost@192.168.0.170  # Substitute your VMs IP
     ghost@192.168.0.170's password:
 
-Enter the ghost user's password and BOOM!  We're in!  Last thing to do is grab
+Enter the ghost user's password and BOOM!  We're in!  All we have to do is grab
 the content of flag:
 
     $ sudo cat /var/www/SpookiLeaks/Docs/flag.txt
