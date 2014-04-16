@@ -46,11 +46,17 @@
                         </a>
 
                         <ul class="dropdown-menu">
+
                             {% for cat, null in categories %}
                                 <li {% if cat == category %} class="active"{% endif %}>
                                     <a href="{{ SITEURL }}/{{ cat.url }}">{{ cat }}</a>
                                 </li>
                             {% endfor %}
+
+                            <li class="divider"></li>
+
+                            <li><a href="{{ SITEURL }}/categories.html">All Categories</a></li>
+
                         </ul>
 
                     </li>
