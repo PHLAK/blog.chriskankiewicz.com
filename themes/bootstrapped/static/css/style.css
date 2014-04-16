@@ -35,6 +35,7 @@ body {
     margin-right: 15px;
     top: -20px;
     width: 60px;
+    z-index: 1;
 }
 
 .site-nav {
