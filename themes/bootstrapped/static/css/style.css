@@ -348,6 +348,23 @@ blockquote {
 /* -----| RESPONSIVE |------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
+@media (max-width: 991px) {
+
+    .post-feedback > div {
+        text-align: center;
+    }
+
+    .post-feedback-share div,
+    .post-share-list li {
+        display: inline-block;
+    }
+
+    .post-share-list .fa-fw {
+        width: 1em;
+    }
+
+}
+
 @media (max-width: 767px) {
 
     .rss-feed .visible-xs {
