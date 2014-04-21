@@ -122,7 +122,7 @@ This results in an error: `File "etc/passwd" Not Found`.  It's important to note
 that the returned error does not contain any dot-dot-slashes.  This means
 they're sanitizing this value but there's still a chance it might not be
 sanitized properly.  Knowing the input and output of this unkown function we can
-make a guess as to what it's doing internally and exploid that.  In this case, a
+make a guess as to what it's doing internally and exploit that.  In this case, a
 good guess is that they are replacing all instanced of `../` with nothing. We
 can test that out by submitting `....//`.  If we're right the inner `../` will
 be replaced with nothing leaving a single `../` in it's place.  Let's test that:
