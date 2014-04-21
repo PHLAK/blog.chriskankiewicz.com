@@ -2,7 +2,7 @@ Title: First Friday script updated and simplified
 Date: 2009-02-14 00:00
 Author: Chris Kankiewicz
 Category: Code
-Tags: 2600, Code, First Friday, PHP, Update
+Tags: PHX2600, Code, First Friday, PHP, Web Development
 Slug: first-friday-script-updated-and-simplified
 
 **NOTE:** The latest version of this script can always be found here:

@@ -1,8 +1,8 @@
 Title: Calculate the first Friday of next month with PHP
 Date: 2008-10-20 00:00
 Author: Chris Kankiewicz
-Category: Code
-Tags: Code, First Friday, PHP, PHX2600
+Category: Development
+Tags: Code, First Friday, PHP, PHX2600, Web Development
 Slug: calculate-the-first-friday-of-next-month-with-php
 
 **UPDATE:** This script has been updated, see:

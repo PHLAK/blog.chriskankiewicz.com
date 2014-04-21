@@ -1,8 +1,8 @@
 Title: Search Engine Optimization Tips
 Date: 2010-04-14 00:00
 Author: Chris Kankiewicz
-Category: Web Development
-Tags: HTML, Search Engine Optimization, SEO
+Category: Development
+Tags: HTML, Search Engine Optimization, SEO, Tips, Web Development
 Slug: search-engine-optimization-tips
 
 Search engine ranking and your web sites traffic are directly influenced by four

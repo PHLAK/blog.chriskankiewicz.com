@@ -1,8 +1,8 @@
 Title: IP Uploader – Python Script (.py)
 Date: 2008-09-30 15:23
 Author: Chris Kankiewicz
-Category: Code
-Tags: Code, Cox, Dynamic IP, Python, Script, VNC
+Category: Development
+Tags: Code, Dynamic IP, Python, Scripting, VNC
 Slug: ip-uploader-python-script-py
 
 **NOTE:** This script can now be found here:

@@ -1,8 +1,8 @@
 Title: Beginers Guide To Search Engine Optimization
 Date: 2009-11-20 00:00
 Author: Chris Kankiewicz
-Category: Web Development
-Tags: Google, Keywords, robots.txt, Search Engine Optimization, SEO, Sitemaps, Yahoo!
+Category: Development
+Tags: Search Engine Optimization, SEO, Tips, Web Development
 Slug: beginers-guide-to-search-engine-optimization
 
 The following is a quick list of optimizations that, in my years of web

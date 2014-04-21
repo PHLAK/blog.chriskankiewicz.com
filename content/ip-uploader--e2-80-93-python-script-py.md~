@@ -1,8 +1,8 @@
 Title: IP Uploader – Python Script (.py)
 Date: 2008-09-30 15:23
 Author: chris
-Category: Code
-Tags: Code, Cox, Dynamic IP, Python, Script, VNC
+Category: Development
+Tags: Code, Dynamic IP, Python, Scripting, VNC
 Slug: ip-uploader-%e2%80%93-python-script-py
 
 \*\*NOTE:\*\* This script can now be found here:
@@ -24,30 +24,30 @@ my home computer to run this script every hour.
 After running this script, you can then use PHP (or any similar
 language) to include this file into any page you desire.
 
-\#! /usr/bin/env python  
-import httplib  
-import sys  
-import os  
+\#! /usr/bin/env python
+import httplib
+import sys
+import os
 import ftplib
 
 file="ip.txt"
 
-conn = httplib.HTTPConnection("www.whatismyip.com")  
-conn.request("GET","/automation/n09230945.asp")  
-response = conn.getresponse()  
+conn = httplib.HTTPConnection("www.whatismyip.com")
+conn.request("GET","/automation/n09230945.asp")
+response = conn.getresponse()
 data = response.read()
 
 filename = str(os.path.abspath(os.path.dirname(sys.argv[0])) +
-"\\\\"+file) \#Create file  
-FILE = open(filename,"w") \#Open file ready for writing  
-FILE.writelines(data) \#Write 'data' to file  
+"\\\\"+file) \#Create file
+FILE = open(filename,"w") \#Open file ready for writing
+FILE.writelines(data) \#Write 'data' to file
 FILE.close() \#Close file
 
-\#Replace [server], [user], and [pass] with your information.  
-s = ftplib.FTP('[server]','[user]','[pass]') \#Connect  
-f = open(file,'rb') \#File to send  
-s.storbinary('STOR '+file, f) \#Send the file  
-f.close() \#Close file and FTP  
+\#Replace [server], [user], and [pass] with your information.
+s = ftplib.FTP('[server]','[user]','[pass]') \#Connect
+f = open(file,'rb') \#File to send
+s.storbinary('STOR '+file, f) \#Send the file
+f.close() \#Close file and FTP
 s.quit() \#Quit FTP
 
 sys.exit(0)

@@ -1,8 +1,8 @@
 Title: Creating Dynamic Menus with PHP and CSS
 Date: 2008-10-05 00:00
 Author: Chris Kankiewicz
-Category: Code
-Tags: CSS, Dynamic Menus, HTML, PHP
+Category: Development
+Tags: CSS, HTML, PHP, Web Development
 Slug: creating-dynamic-menus-with-php-and-css
 
 Want to pep up your web page with some dynamic menus? Here’s a simple solution
