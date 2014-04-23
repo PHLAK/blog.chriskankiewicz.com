@@ -66,6 +66,9 @@ SITEMAP = {
 # Static Paths
 # STATIC_PATHS = ['images']
 
+# Files to copy
+FILES_TO_COPY = (('extra/robots.txt', 'robots.txt'))
+
 # Custom Links
 LINKS = (
     ('ChrisKankiewicz.com', 'https://chriskankiewicz.com'),
