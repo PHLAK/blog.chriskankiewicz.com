@@ -1,7 +1,7 @@
 Title: First Friday script updated and simplified
 Date: 2009-02-14 00:00
 Author: Chris Kankiewicz
-Category: Code
+Category: Development
 Tags: PHX2600, Code, First Friday, PHP, Web Development
 Slug: first-friday-script-updated-and-simplified
 
