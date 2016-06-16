@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Locking Down Ubuntu 14.04 Server | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="Ubuntu" />
+        <meta name="tags" contents="Trusty Thar" />
+        <meta name="tags" contents="Security" />
+        <meta name="tags" contents="SSH" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="..">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="../category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="../category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="../category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="../category/hardware.html">Hardware</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="../category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="../category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="../category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="../categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="../feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Locking Down Ubuntu 14.04 Server</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="May 04, 2014 - 11:15 PM">
+                                        <div class="month">May</div>
+                                        <div class="day">04</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="../author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="../tag/ubuntu.html">Ubuntu</a></li>
+                                            <li><a href="../tag/trusty-thar.html">Trusty Thar</a></li>
+                                            <li><a href="../tag/security.html">Security</a></li>
+                                            <li><a href="../tag/ssh.html">SSH</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>Intro...</p>
+<p>This is by no means a comprehensive guide to securing your server but it's a
+good place to start.</p>
+<h2>Assumptions</h2>
+<p>This article assumes you:</p>
+<ul>
+<li>already have <a href="http://releases.ubuntu.com/trusty/">Ubuntu 14.04</a>
+    installed and fully patched</li>
+<li>have an account with sudo access</li>
+<li>have a basic knowledge of and are comfortable using bash</li>
+</ul>
+<h2>Update Your System</h2>
+<p>The first step to protecting your system is to install all the latest updates
+and patches for your existing software.  This can be accomplished by running the
+following commands:</p>
+<div class="highlight"><pre>$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get dist-upgrade
+</pre></div>
+
+
+<p>Updating your packages is only good until the next set of security patches are
+released.  Consider setting up
+<a href="https://help.ubuntu.com/14.04/serverguide/automatic-updates.html">unattended-upgrades</a>
+to automatically install the latest updates as they're made available.</p>
+<h2>Locking Down SSH</h2>
+<h3>Allowed UserNames</h3>
+<div class="highlight"><pre>UserNames alice bob charlie
+</pre></div>
+
+
+<h3>Use an Alternate Port</h3>
+<p>Security through obscurity isn't security at all, however you can cut back on
+some of the automated bot spam simply by changing the port SSH uses.</p>
+<div class="highlight"><pre>Port 2468
+</pre></div>
+
+
+<h3>Disable root Login</h3>
+<div class="highlight"><pre>PermitRootLogin no
+</pre></div>
+
+
+<h3>Force SSH Key Authentication</h3>
+<div class="highlight"><pre>PubkeyAuthentication yes
+PasswordAuthentication no
+</pre></div>
+
+
+<h2>Install and Configure fail2ban</h2>
+<div class="highlight"><pre>$ sudo apt-get install fail2ban
+</pre></div>
+
+
+<h2>Install and Configure a Firewall</h2>
+<div class="highlight"><pre>$ sudo apt-get install ufw
+</pre></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

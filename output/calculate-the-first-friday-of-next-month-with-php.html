@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Calculate the first Friday of next month with PHP | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="Code" />
+        <meta name="tags" contents="First Friday" />
+        <meta name="tags" contents="PHP" />
+        <meta name="tags" contents="PHX2600" />
+        <meta name="tags" contents="Web Development" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li  class="active">
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li >
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Calculate the first Friday of next month with PHP</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="October 20, 2008 - 12:00 AM">
+                                        <div class="month">Oct</div>
+                                        <div class="day">20</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/code.html">Code</a></li>
+                                            <li><a href="./tag/first-friday.html">First Friday</a></li>
+                                            <li><a href="./tag/php.html">PHP</a></li>
+                                            <li><a href="./tag/phx2600.html">PHX2600</a></li>
+                                            <li><a href="./tag/web-development.html">Web Development</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p><strong>UPDATE:</strong> This script has been updated, see:
+<a href="https://github.com/PHX2600/FirstFriday">https://github.com/PHX2600/FirstFriday</a></p>
+<p>While developing phx2600.org, I ran into a slight dilemma. The PHX2600 meetings
+occur once a month on the first Friday of every month, and we wanted to display
+that on the site. However, it was becoming a tedious chore to change the date
+once a month manually. So, being the automation addict I am, I thought, why not
+write a script. So one night I hammered out the following script that will
+calculate the first Friday of next month:</p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+    <span class="sd">/***************************************</span>
+<span class="sd">     * FILENAME: first-friday.php          *</span>
+<span class="sd">     * AUTHOR: Chris Kankiewicz [PHLAK]    *</span>
+<span class="sd">     * WEBSITE: http://www.web-geek.net    *</span>
+<span class="sd">     ***************************************/</span>
+
+    <span class="c1">// START FUNCTIONS</span>
+
+    <span class="k">function</span> <span class="nf">get_day</span><span class="p">(</span><span class="nv">$describer</span><span class="p">,</span><span class="nv">$weekday</span><span class="p">,</span><span class="nv">$reference_date</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// $reference_date format = m-Y</span>
+
+        <span class="nv">$d</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="nv">$reference_date</span><span class="p">);</span>
+
+        <span class="k">switch</span> <span class="p">(</span><span class="nv">$describer</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="s1">&#39;first&#39;</span><span class="o">:</span> <span class="nv">$offset</span> <span class="o">=</span> <span class="nx">get_day_offset</span><span class="p">(</span><span class="nv">$reference_date</span><span class="p">,</span><span class="nv">$weekday</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nv">$r</span> <span class="o">=</span> <span class="nb">mktime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nv">$d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="o">+</span><span class="nv">$offset</span><span class="p">,</span><span class="nv">$d</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+        <span class="k">return</span> <span class="nv">$r</span><span class="p">;</span> <span class="c1">//returns timestamp format</span>
+    <span class="p">}</span>
+
+    <span class="k">function</span> <span class="nf">get_day_offset</span><span class="p">(</span><span class="nv">$anchor</span><span class="p">,</span><span class="nv">$target</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//$anchor format = m-Y</span>
+
+        <span class="nv">$ts</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="nv">$anchor</span><span class="p">);</span>
+        <span class="nv">$ts</span> <span class="o">=</span> <span class="nb">mktime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nv">$ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;01&#39;</span><span class="p">,</span><span class="nv">$ts</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+        <span class="nv">$anchor</span> <span class="o">=</span> <span class="nb">date</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="nv">$ts</span><span class="p">);</span>
+        <span class="nv">$target</span> <span class="o">=</span> <span class="nb">strtolower</span><span class="p">(</span><span class="nv">$target</span><span class="p">);</span>
+        <span class="nv">$days</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+            <span class="s1">&#39;sunday&#39;</span><span class="o">=&gt;</span><span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;monday&#39;</span><span class="o">=&gt;</span><span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;tuesday&#39;</span><span class="o">=&gt;</span><span class="mi">2</span><span class="p">,</span>
+            <span class="s1">&#39;wednesday&#39;</span><span class="o">=&gt;</span><span class="mi">3</span><span class="p">,</span>
+            <span class="s1">&#39;thursday&#39;</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;friday&#39;</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;saturday&#39;</span><span class="o">=&gt;</span><span class="mi">6</span>
+        <span class="p">);</span>
+
+        <span class="nv">$offset</span> <span class="o">=</span> <span class="nv">$days</span><span class="p">[</span><span class="nv">$target</span><span class="p">]</span> <span class="o">-</span> <span class="nv">$anchor</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$offset</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> <span class="nv">$offset</span><span class="o">+=</span><span class="mi">7</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="nv">$offset</span><span class="p">;</span> <span class="c1">//returns 0-6 for use in get_day();</span>
+    <span class="p">}</span>
+
+    <span class="c1">//END FUNCTIONS</span>
+
+    <span class="nv">$t</span> <span class="o">=</span> <span class="nb">getdate</span><span class="p">();</span> <span class="c1">//Get today&#39;s date</span>
+
+    <span class="nv">$today</span> <span class="o">=</span> <span class="nb">date</span><span class="p">(</span><span class="s1">&#39;m-Y&#39;</span><span class="p">,</span><span class="nv">$t</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="c1">//Display today&#39;s date as MM-YYYY</span>
+
+    <span class="c1">//Calculate Next Month</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;12&#39;</span><span class="p">){</span>
+        <span class="nv">$nm</span> <span class="o">=</span> <span class="s1">&#39;1-&#39;</span><span class="o">.</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">year</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">elseif</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mday</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;7&#39;</span> <span class="o">&amp;&amp;</span> <span class="nv">$t</span><span class="p">[</span><span class="nx">wday</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;5&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$nm</span> <span class="o">=</span> <span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">])</span><span class="o">.</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="nv">$t</span><span class="p">[</span><span class="nx">year</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nv">$nm</span> <span class="o">=</span> <span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="nv">$t</span><span class="p">[</span><span class="nx">year</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="nv">$date</span> <span class="o">=</span> <span class="nx">get_day</span><span class="p">(</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;friday&quot;</span><span class="p">,</span> <span class="nv">$nm</span><span class="p">);</span>
+
+    <span class="c1">//Checks if today is after the first friday of the month</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span> <span class="o">==</span> <span class="nb">date</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="nv">$date</span><span class="p">)</span>
+        <span class="o">&amp;&amp;</span> <span class="nv">$t</span><span class="p">[</span><span class="nx">mday</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">date</span><span class="p">(</span><span class="s1">&#39;j&#39;</span><span class="p">,</span><span class="nv">$date</span><span class="p">)</span>
+        <span class="o">&amp;&amp;</span> <span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;12&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$nm</span> <span class="o">=</span> <span class="s1">&#39;1-&#39;</span><span class="o">.</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">year</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+            <span class="nv">$ff</span> <span class="o">=</span> <span class="nx">get_day</span><span class="p">(</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;friday&quot;</span><span class="p">,</span> <span class="nv">$nm</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">elseif</span><span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span> <span class="o">==</span> <span class="nb">date</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="nv">$date</span><span class="p">)</span>
+        <span class="o">&amp;&amp;</span> <span class="nv">$t</span><span class="p">[</span><span class="nx">mday</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">date</span><span class="p">(</span><span class="s1">&#39;j&#39;</span><span class="p">,</span><span class="nv">$date</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;12&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$nm</span> <span class="o">=</span> <span class="p">(</span><span class="nv">$t</span><span class="p">[</span><span class="nx">mon</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="nv">$t</span><span class="p">[</span><span class="nx">year</span><span class="p">];</span>
+            <span class="nv">$ff</span> <span class="o">=</span> <span class="nx">get_day</span><span class="p">(</span><span class="s2">&quot;first&quot;</span><span class="p">,</span><span class="s2">&quot;friday&quot;</span><span class="p">,</span><span class="nv">$nm</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nv">$ff</span> <span class="o">=</span> <span class="nv">$date</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// I know this code is crap, deal with it or fix it yourself!</span>
+
+    <span class="k">echo</span> <span class="nb">date</span><span class="p">(</span><span class="s2">&quot;F j, Y&quot;</span><span class="p">,</span> <span class="nv">$ff</span><span class="p">);</span>
+
+<span class="cp">?&gt;</span>
+</pre></div>
+
+
+<p>I apologies for the crappy code, I was either tired, drunk or both the night I
+wrote this.</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/calculate-the-first-friday-of-next-month-with-php.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Calculate%20the%20first%20Friday%20of%20next%20month%20with%20PHP%20 http%3A//blog.chriskankiewicz.com/calculate-the-first-friday-of-next-month-with-php.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/calculate-the-first-friday-of-next-month-with-php.html&p[images][0]=&p[title]=Calculate%20the%20first%20Friday%20of%20next%20month%20with%20PHP%20&p[summary]=%3Cp%3E%3Cstrong%3EUPDATE%3A%3C/strong%3E%20This%20script%20has%20been%20updated%2C%20see%3A%0A%3Ca%20href%3D%22https%3A//github.com/PHX2600/FirstFriday%22%3Ehttps%3A//github.com/PHX2600/FirstFriday%3C/a%3E%3C/p%3E%0A%3Cp%3EWhile%20developing%20phx2600.org%2C%20I%20ran%20into%20a%20slight%20dilemma.%20The%20PHX2600%20meetings%0Aoccur%20once%20a%20month%20on%20the%20first%20Friday%20of%20every%20month%2C%20and%20we%20wanted%20to%20display%0Athat%20on%20the%20site.%20However%2C%20it%20was%20becoming%20a%20tedious%20chore%20to%20change%20the%20date%0Aonce%20a%20month%20manually.%20So%2C%20being%20the%20automation%20addict%20I%20am%2C%20I%20thought%2C%20why%20not%0Awrite%20a%20script.%20So%20one%20night%20I%20hammered%20out%20...%3C/p%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Calculate%20the%20first%20Friday%20of%20next%20month%20with%20PHP%20&body=http%3A//blog.chriskankiewicz.com/calculate-the-first-friday-of-next-month-with-php.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./first-friday-script-updated-and-simplified.html" title="First Friday script updated and simplified">
+                        First Friday script updated and simplified
+                    </a>
+                </li>
+                <li>
+                    <a href="./creating-dynamic-menus-with-php-and-css.html" title="Creating Dynamic Menus with PHP and CSS">
+                        Creating Dynamic Menus with PHP and CSS
+                    </a>
+                </li>
+                <li>
+                    <a href="./beginers-guide-to-search-engine-optimization.html" title="Beginers Guide To Search Engine Optimization">
+                        Beginers Guide To Search Engine Optimization
+                    </a>
+                </li>
+                <li>
+                    <a href="./ip-uploader-python-script-py.html" title="IP Uploader – Python Script (.py)">
+                        IP Uploader – Python Script (.py)
+                    </a>
+                </li>
+                <li>
+                    <a href="./search-engine-optimization-tips.html" title="Search Engine Optimization Tips">
+                        Search Engine Optimization Tips
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

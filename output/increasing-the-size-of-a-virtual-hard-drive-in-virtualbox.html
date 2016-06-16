@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Increasing the Size of a Virtual Hard Drive in VirtualBox | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="Virtual Machine" />
+        <meta name="tags" contents="VirtualBox" />
+        <meta name="tags" contents="VM" />
+        <meta name="tags" contents="Windows 7" />
+        <meta name="tags" contents="Development" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li >
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Increasing the Size of a Virtual Hard Drive in VirtualBox</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="November 16, 2011 - 08:59 AM">
+                                        <div class="month">Nov</div>
+                                        <div class="day">16</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/virtual-machine.html">Virtual Machine</a></li>
+                                            <li><a href="./tag/virtualbox.html">VirtualBox</a></li>
+                                            <li><a href="./tag/vm.html">VM</a></li>
+                                            <li><a href="./tag/windows-7.html">Windows 7</a></li>
+                                            <li><a href="./tag/development.html">Development</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>I work in Linux primarily but run a Windows 7 virtual machine in VirtualBox so I
+can use Photoshop and do some necessary testing. Today my VM ran out of space.
+Silly me thought 20GB would be enough, but after installing service pack 1,
+dozens of Windows updates and a few programs I had less than 1GB of space left.
+After a little searching I found an easy way to increase the size of a virtual
+disk.</p>
+<p>First, shut down your VM then run the following command from your host PC:</p>
+<div class="highlight"><pre><span></span>$ VBoxManage modifyhd /path/to/guest.vdi --resize &lt;size_in_mb&gt;
+</pre></div>
+
+
+<p>Once completed, boot into your VM and (for Windows) open up Control Panel -&gt;
+Administrative Tools -&gt; Computer Management. In Computer Management navigate to
+Storage -&gt; Disk Management then, in the right pane, right click your disk and
+select "Extend Volume" and follow the prompts to resize your disk. And that's
+it! Your disk will now be resized.</p>
+<p>This also works from a Windows host, you just have to locate and use
+VBoxManage.exe</p>
+<p><strong>Note:</strong> This method only allows you to INCREASE the size of a virtual disk.
+You cannot shrink one with this method.</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Increasing%20the%20Size%20of%20a%20Virtual%20Hard%20Drive%20in%20VirtualBox%20 http%3A//blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html&p[images][0]=&p[title]=Increasing%20the%20Size%20of%20a%20Virtual%20Hard%20Drive%20in%20VirtualBox%20&p[summary]=%3Cp%3EI%20work%20in%20Linux%20primarily%20but%20run%20a%20Windows%207%20virtual%20machine%20in%20VirtualBox%20so%20I%0Acan%20use%20Photoshop%20and%20do%20some%20necessary%20testing.%20Today%20my%20VM%20ran%20out%20of%20space.%0ASilly%20me%20thought%2020GB%20would%20be%20enough%2C%20but%20after%20installing%20service%20pack%201%2C%0Adozens%20of%20Windows%20updates%20and%20a%20few%20programs%20I%20had%20less%20than%201GB%20of%20space%20left.%0AAfter%20a%20little%20searching%20I%20found%20an%20easy%20way%20to%20increase%20the%20size%20of%20a%20virtual%0Adisk.%3C/p%3E%0A%3Cp%3EFirst%2C%20shut%20down%20...%3C/p%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Increasing%20the%20Size%20of%20a%20Virtual%20Hard%20Drive%20in%20VirtualBox%20&body=http%3A//blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./windows-7-activation-hack.html" title="Windows 7 Activation Hack">
+                        Windows 7 Activation Hack
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

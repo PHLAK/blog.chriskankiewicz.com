@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/code.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2009-02-14T00:00:00-07:00</updated><entry><title>First Friday script updated and simplified</title><link href="http://blog.chriskankiewicz.com/first-friday-script-updated-and-simplified.html" rel="alternate"></link><updated>2009-02-14T00:00:00-07:00</updated><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2009-02-14:first-friday-script-updated-and-simplified.html</id><summary type="html">&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The latest version of this script can always be found here:
+&lt;a href="https://github.com/PHX2600/FirstFriday"&gt;https://github.com/PHX2600/FirstFriday&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;With this update I have drastically reduced and simpified the code to produce
+the same results. I did some rigorous testing of my own to make sure this script
+will calculate the correct date, but that doesn’t mean it’s bullet-proof. If you
+find a bug, please email me so I can fix it.&lt;/p&gt;
+&lt;h3&gt;first-friday.php&lt;/h3&gt;
+&lt;p&gt;Somewhere along the lines of moving my blog from one site/platform to another I
+lost this sample of code. See link above for the latest version of this script.&lt;/p&gt;</summary><category term="PHX2600"></category><category term="Code"></category><category term="First Friday"></category><category term="PHP"></category><category term="Web Development"></category></entry></feed>

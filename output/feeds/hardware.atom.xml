@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/hardware.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2008-12-15T00:00:00-07:00</updated><entry><title>BlackBerry Storm Unboxing</title><link href="http://blog.chriskankiewicz.com/blackberry-storm-unboxing.html" rel="alternate"></link><published>2008-12-15T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-12-15:blackberry-storm-unboxing.html</id><summary type="html">&lt;p&gt;I went to the Verizon store at 10am the day of release and they said they had
+sold out ~2 hours before I got there. I was able to order one and they were nice
+enough to write off the rebate right away and overnight me a Storm directly from
+the factory. By noon the following day I had my Storm and the following are
+photos of the unboxing. I know this is rather late, but like they say, better
+late than never.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="The Cover" src="{filename}/images/blackberry-storm-unboxing/the-cover.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="The Box" src="{filename}/images/blackberry-storm-unboxing/the-box.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Just Inside the Box" src="{filename}/images/blackberry-storm-unboxing/just-inside-the-box.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="THE STORM!" src="{filename}/images/blackberry-storm-unboxing/the-storm.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Under the Cover" src="{filename}/images/blackberry-storm-unboxing/under-the-cover.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Booting Up" src="{filename}/images/blackberry-storm-unboxing/booting-up.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;After my phone finished booting I forgot all about taking pictures. The
+following pictures were taken about a week later after I had been using the
+phone for a while.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Up and Running" src="{filename}/images/blackberry-storm-unboxing/up-and-running.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Anyone Got the Time?" src="{filename}/images/blackberry-storm-unboxing/anyone-got-the-time.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="BlackBerry Maps" src="{filename}/images/blackberry-storm-unboxing/blackberry-maps.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;I’ve now had my Storm for just over 3 weeks and I love it! Every aspect of it is
+great. Sure there are some problems with the software, but nothing major or
+inconvinient, and since it’s software, there’s a good chance it will be fixed in
+the near future. Bottom line though, I don’t know how I lived without a
+BlackBerry up until now!&lt;/p&gt;</summary><category term="9530"></category><category term="BlackBerry Storm"></category><category term="Smart Phone"></category><category term="Touch Screen"></category><category term="Verizon Wireless"></category></entry><entry><title>Turn your old PC into a hardware firewall with IPCop</title><link href="http://blog.chriskankiewicz.com/turn-your-old-pc-into-a-hardware-firewall-with-ipcop.html" rel="alternate"></link><published>2008-10-02T22:18:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-02:turn-your-old-pc-into-a-hardware-firewall-with-ipcop.html</id><summary type="html">&lt;p&gt;So you’ve got a 10-year old PC sitting around the house. You’re sick of your
+cats always getting into the wires and knocking the darn thing over. You don’t
+want to throw it away, but you just don’t know what to do with it. Well my
+friend, why don’t you turn that thing into a new hardware firewall?!&lt;/p&gt;
+&lt;p&gt;How would you go about doing that you might ask, well I’ve got the solution for
+you: &lt;strong&gt;IPCop&lt;/strong&gt;!&lt;/p&gt;
+&lt;h2&gt;What is IPCop?&lt;/h2&gt;
+&lt;p&gt;IPCop is a secure Linux distribution managed through a web-interface. It turns
+an old PC into a firewall and VPN gateway. Features an Intrusion Detection
+System. Check it out at &lt;a href="http://www.ipcop.org/"&gt;http://www.ipcop.org&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;What are the hardware requirements for IPCop?&lt;/h2&gt;
+&lt;p&gt;I ran IPCop on an old system I had lying around. Specs:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pentium 2&lt;/li&gt;
+&lt;li&gt;320MB PC100/133 RAM&lt;/li&gt;
+&lt;li&gt;20GB HDD (Overkill, but the smallest I had)&lt;/li&gt;
+&lt;li&gt;2 NICs&lt;/li&gt;
+&lt;li&gt;ATI Rage 8MB Video Card *&lt;/li&gt;
+&lt;li&gt;CD ROM *&lt;/li&gt;
+&lt;li&gt;Cardboard and packaging tape (to keep as much cat/dog hair out as
+    possible... and for STYLE!)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;* Only needed for install&lt;/p&gt;
+&lt;p&gt;The actual requirements are pretty low. You probably only need a 2-5GB hard
+drive, smaller if don’t plan on keeping any logs. Also, if you’re not planning
+on running the intrusion detection system, you could get away with 64MB of RAM
+easily.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Hardware Firewall Running IPCop" src="http://farm4.static.flickr.com/3191/2897432811_f379a00d59.jpg" /&gt;&lt;/p&gt;
+&lt;h2&gt;Where do I get it?&lt;/h2&gt;
+&lt;p&gt;Go to &lt;a href="http://www.ipcop.org/"&gt;http://www.ipcop.org&lt;/a&gt; and choose “Download” from
+the menu on the left. This will forward you to a SourceForge page. Find the
+latest version and download the .ISO file. You will then have to use some
+&lt;a href="http://cdburnerxp.se/en/download"&gt;CD burning software&lt;/a&gt; to burn the .ISO as a
+bootable CD.&lt;/p&gt;
+&lt;h2&gt;How do I install IPCop?&lt;/h2&gt;
+&lt;p&gt;IPCop couldn’t have been easier to install. You just pop the CD you burned in
+the last step into your CD ROM drive and boot the computer. Make sure your
+computer is set to boot from the CD drive first, otherwise this wont work. Once
+the install CD boots, just follow the on-screen instructions. Most of the
+options are pretty straigt forward, if you’re at all confused about any of it,
+refer to the documentation found here:
+&lt;a href="http://www.ipcop.org/index.php?module=pnWikka&amp;amp;tag=IPCopDocumentation"&gt;http://www.ipcop.org/index.php?module=pnWikka&amp;amp;tag=IPCopDocumentation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Also, this episode of Systm was a great resource:
+&lt;a href="http://revision3.com/systm/firewall/"&gt;http://revision3.com/systm/firewall/&lt;/a&gt;,
+I highly recommend checking this out before you start your project.&lt;/p&gt;
+&lt;h2&gt;Got anything else?&lt;/h2&gt;
+&lt;p&gt;Web interface screenshots @
+&lt;a href="http://www.flickr.com/photos/kankie/sets/72157607445592055/detail/"&gt;http://www.flickr.com/photos/kankie/sets/72157607445592055/detail/&lt;/a&gt;&lt;/p&gt;</summary><category term="CDBurnerXP"></category><category term="Firewall"></category><category term="Hardware"></category><category term="IPCop"></category><category term="Linux"></category><category term="PC"></category><category term="Software"></category><category term="Systm"></category></entry></feed>

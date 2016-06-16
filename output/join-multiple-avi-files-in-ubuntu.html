@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Join multiple .avi files in Ubuntu | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="AVI" />
+        <meta name="tags" contents="Transcode" />
+        <meta name="tags" contents="Ubuntu" />
+        <meta name="tags" contents="Video" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Join multiple .avi files in Ubuntu</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="December 29, 2010 - 06:24 PM">
+                                        <div class="month">Dec</div>
+                                        <div class="day">29</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/avi.html">AVI</a></li>
+                                            <li><a href="./tag/transcode.html">Transcode</a></li>
+                                            <li><a href="./tag/ubuntu.html">Ubuntu</a></li>
+                                            <li><a href="./tag/video.html">Video</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>I was just in a bit of a pickle and needed to join two .avi files together while
+in Ubuntu.  There are a number of solutions out there, but the most simple
+solution I could find was via <code>avimerge</code>. Here's how I did it.</p>
+<h2>Install avimerge</h2>
+<div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install transcode-utils
+</pre></div>
+
+
+<h2>Merge your files</h2>
+<div class="highlight"><pre><span></span>avimerge -i input_file1.avi input_file2.avi -o output_file.avi
+</pre></div>
+
+
+<p>It's as simple as that. I did this in Ubuntu 10.10, but this should work for
+older versions as well.</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/join-multiple-avi-files-in-ubuntu.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Join%20multiple%20.avi%20files%20in%20Ubuntu%20 http%3A//blog.chriskankiewicz.com/join-multiple-avi-files-in-ubuntu.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/join-multiple-avi-files-in-ubuntu.html&p[images][0]=&p[title]=Join%20multiple%20.avi%20files%20in%20Ubuntu%20&p[summary]=%3Cp%3EI%20was%20just%20in%20a%20bit%20of%20a%20pickle%20and%20needed%20to%20join%20two%20.avi%20files%20together%20while%0Ain%20Ubuntu.%C2%A0%20There%20are%20a%20number%20of%20solutions%20out%20there%2C%20but%20the%20most%20simple%0Asolution%20I%20could%20find%20was%20via%20%3Ccode%3Eavimerge%3C/code%3E.%20Here%27s%20how%20I%20did%20it.%3C/p%3E%0A%3Ch2%3EInstall%20avimerge%3C/h2%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%3E%3C/span%3Esudo%20apt-get%20update%0Asudo%20apt-get%20install%20transcode-utils%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Ch2%3EMerge%20your%20files%3C/h2%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%3E%3C/span%3Eavimerge%20-i%20input_file1.avi%20input_file2.avi%20-o%20output_file.avi%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Cp%3EIt%27s%20as%20simple%20as%20that.%20I%20did%20this%20in%20Ubuntu%2010.10%2C%20but%20...%3C/p%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Join%20multiple%20.avi%20files%20in%20Ubuntu%20&body=http%3A//blog.chriskankiewicz.com/join-multiple-avi-files-in-ubuntu.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./postfix-using-gmail-as-a-relay-host.html" title="Postfix: Using Gmail as a Relay Host">
+                        Postfix: Using Gmail as a Relay Host
+                    </a>
+                </li>
+                <li>
+                    <a href="./setting-up-an-ubuntu-web-server.html" title="Setting Up an Ubuntu Web Server">
+                        Setting Up an Ubuntu Web Server
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

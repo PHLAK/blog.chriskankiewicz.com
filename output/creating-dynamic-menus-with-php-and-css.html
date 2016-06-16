@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Creating Dynamic Menus with PHP and CSS | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="CSS" />
+        <meta name="tags" contents="HTML" />
+        <meta name="tags" contents="PHP" />
+        <meta name="tags" contents="Web Development" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li  class="active">
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li >
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Creating Dynamic Menus with PHP and CSS</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="October 05, 2008 - 12:00 AM">
+                                        <div class="month">Oct</div>
+                                        <div class="day">05</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/css.html">CSS</a></li>
+                                            <li><a href="./tag/html.html">HTML</a></li>
+                                            <li><a href="./tag/php.html">PHP</a></li>
+                                            <li><a href="./tag/web-development.html">Web Development</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>Want to pep up your web page with some dynamic menus? Here’s a simple solution
+that only requires a few lines of PHP and CSS.</p>
+<p><strong>UPDATE (11/1/08):</strong> Simplified the header code and edited the syntax of the
+list element echo code.</p>
+<h2>The PHP</h2>
+<p>Add the following to the top of your page (before the DOCTYPE or HTML tag).</p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+    <span class="c1">// Get current page file name</span>
+    <span class="nv">$page</span> <span class="o">=</span> <span class="nb">basename</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">&quot;PHP_SELF&quot;</span><span class="p">]);</span>
+<span class="cp">?&gt;</span>
+</pre></div>
+
+
+<p>Then add the following to your menu item where you want the class designation to
+show up.</p>
+<p>Each link should have this piece of code in it. Make sure you replace
+<code>index.php</code> with the appropriate file name for the page. Example:</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;navigation&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;index.php&quot;</span> <span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$page</span> <span class="o">==</span> <span class="s2">&quot;index.php&quot;</span><span class="p">)</span> <span class="k">echo</span> <span class="s1">&#39;class=&quot;current&quot;&#39;</span> <span class="cp">?&gt;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;resume.php&quot;</span> <span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$page</span> <span class="o">==</span> <span class="s2">&quot;resume.php&quot;</span><span class="p">)</span> <span class="k">echo</span> <span class="s1">&#39;class=&quot;current&quot;&#39;</span> <span class="cp">?&gt;</span><span class="nt">&gt;</span>Resume<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;photography.php&quot;</span> <span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$page</span> <span class="o">==</span> <span class="s2">&quot;photography.php&quot;</span><span class="p">)</span> <span class="k">echo</span> <span class="s1">&#39;class=&quot;current&quot;&#39;</span> <span class="cp">?&gt;</span><span class="nt">&gt;</span>Photography<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;about.php&quot;</span> <span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$page</span> <span class="o">==</span> <span class="s2">&quot;about.php&quot;</span><span class="p">)</span> <span class="k">echo</span> <span class="s1">&#39;class=&quot;current&quot;&#39;</span> <span class="cp">?&gt;</span><span class="nt">&gt;</span>About<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;contact.php&quot;</span> <span class="cp">&lt;?php</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$page</span> <span class="o">==</span> <span class="s2">&quot;contact.php&quot;</span><span class="p">)</span> <span class="k">echo</span> <span class="s1">&#39;class=&quot;current&quot;&#39;</span> <span class="cp">?&gt;</span><span class="nt">&gt;</span>Contact<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+
+<p><strong>Note:</strong> the 2 chevrons (<code>&gt;&gt;</code>) at the end are on purpose. One closes the PHP tag
+the other closes the <code>a</code> tag.</p>
+<h2>The CSS</h2>
+<p>Lastly, add the following element to your style sheet and style it as you
+please.</p>
+<div class="highlight"><pre><span></span><span class="nn">#navigation</span> <span class="nt">ul</span> <span class="nt">li</span> <span class="nt">a</span><span class="nc">.current</span> <span class="p">{</span>
+    <span class="nb">background-color</span><span class="o">:</span> <span class="m">#FFF</span><span class="p">;</span>
+    <span class="nb">border-bottom</span><span class="o">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="m">#FFF</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This process will result in the following:</p>
+<p><img alt="Tabs with HTML/CSS/PHP" src="./images/creating-dynamic-menus-with-php-and-css/tabs-with-html-css-php.png" /></p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/creating-dynamic-menus-with-php-and-css.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Creating%20Dynamic%20Menus%20with%20PHP%20and%20CSS%20 http%3A//blog.chriskankiewicz.com/creating-dynamic-menus-with-php-and-css.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/creating-dynamic-menus-with-php-and-css.html&p[images][0]=&p[title]=Creating%20Dynamic%20Menus%20with%20PHP%20and%20CSS%20&p[summary]=%3Cp%3EWant%20to%20pep%20up%20your%20web%20page%20with%20some%20dynamic%20menus%3F%20Here%E2%80%99s%20a%20simple%20solution%0Athat%20only%20requires%20a%20few%20lines%20of%20PHP%20and%20CSS.%3C/p%3E%0A%3Cp%3E%3Cstrong%3EUPDATE%20%2811/1/08%29%3A%3C/strong%3E%20Simplified%20the%20header%20code%20and%20edited%20the%20syntax%20of%20the%0Alist%20element%20echo%20code.%3C/p%3E%0A%3Ch2%3EThe%20PHP%3C/h2%3E%0A%3Cp%3EAdd%20the%20following%20to%20the%20top%20of%20your%20page%20%28before%20the%20DOCTYPE%20or%20HTML%20tag%29.%3C/p%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%3E%3C/span%3E%3Cspan%20class%3D%22cp%22%3E%26lt%3B%3Fphp%3C/span%3E%0A%20%20%20%20%3Cspan%20class%3D%22c1%22%3E//%20Get%20current%20page%20file%20name%3C/span%3E%0A%20%20%20%20%3Cspan%20class%3D%22nv%22%3E%24page%3C/span%3E%20%3Cspan%20class%3D%22o%22%3E%3D%3C/span%3E%20%3Cspan%20class%3D%22nb%22%3Ebasename%3C/span%3E%3Cspan%20class%3D%22p%22%3E%28%3C/span%3E%3Cspan%20class%3D%22nv%22%3E%24_SERVER%3C/span%3E%3Cspan%20class%3D%22p%22%3E%5B%3C/span%3E%3Cspan%20class%3D%22s2%22%3E%26quot%3BPHP_SELF%26quot%3B%3C/span%3E%3Cspan%20class%3D%22p%22%3E%5D%29%3B%3C/span%3E%0A%3Cspan%20class%3D%22cp%22%3E%3F%26gt%3B%3C/span%3E%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Cp%3EThen%20add%20the%20following%20to%20your%20menu%20item%20where%20...%3C/p%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Creating%20Dynamic%20Menus%20with%20PHP%20and%20CSS%20&body=http%3A//blog.chriskankiewicz.com/creating-dynamic-menus-with-php-and-css.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./search-engine-optimization-tips.html" title="Search Engine Optimization Tips">
+                        Search Engine Optimization Tips
+                    </a>
+                </li>
+                <li>
+                    <a href="./first-friday-script-updated-and-simplified.html" title="First Friday script updated and simplified">
+                        First Friday script updated and simplified
+                    </a>
+                </li>
+                <li>
+                    <a href="./calculate-the-first-friday-of-next-month-with-php.html" title="Calculate the first Friday of next month with PHP">
+                        Calculate the first Friday of next month with PHP
+                    </a>
+                </li>
+                <li>
+                    <a href="./beginers-guide-to-search-engine-optimization.html" title="Beginers Guide To Search Engine Optimization">
+                        Beginers Guide To Search Engine Optimization
+                    </a>
+                </li>
+                <li>
+                    <a href="./cactuscon-2014-ctf-writeup.html" title="CactusCon 2014 CTF Writeup">
+                        CactusCon 2014 CTF Writeup
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

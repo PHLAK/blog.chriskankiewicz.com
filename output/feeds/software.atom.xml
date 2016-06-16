@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/software.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2011-11-16T08:59:00-07:00</updated><entry><title>Increasing the Size of a Virtual Hard Drive in VirtualBox</title><link href="http://blog.chriskankiewicz.com/increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html" rel="alternate"></link><published>2011-11-16T08:59:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-11-16:increasing-the-size-of-a-virtual-hard-drive-in-virtualbox.html</id><summary type="html">&lt;p&gt;I work in Linux primarily but run a Windows 7 virtual machine in VirtualBox so I
+can use Photoshop and do some necessary testing. Today my VM ran out of space.
+Silly me thought 20GB would be enough, but after installing service pack 1,
+dozens of Windows updates and a few programs I had less than 1GB of space left.
+After a little searching I found an easy way to increase the size of a virtual
+disk.&lt;/p&gt;
+&lt;p&gt;First, shut down your VM then run the following command from your host PC:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ VBoxManage modifyhd /path/to/guest.vdi --resize &amp;lt;size_in_mb&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once completed, boot into your VM and (for Windows) open up Control Panel -&amp;gt;
+Administrative Tools -&amp;gt; Computer Management. In Computer Management navigate to
+Storage -&amp;gt; Disk Management then, in the right pane, right click your disk and
+select "Extend Volume" and follow the prompts to resize your disk. And that's
+it! Your disk will now be resized.&lt;/p&gt;
+&lt;p&gt;This also works from a Windows host, you just have to locate and use
+VBoxManage.exe&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This method only allows you to INCREASE the size of a virtual disk.
+You cannot shrink one with this method.&lt;/p&gt;</summary><category term="Virtual Machine"></category><category term="VirtualBox"></category><category term="VM"></category><category term="Windows 7"></category><category term="Development"></category></entry><entry><title>Windows 7 Activation Hack</title><link href="http://blog.chriskankiewicz.com/windows-7-activation-hack.html" rel="alternate"></link><published>2011-07-19T21:18:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-07-19:windows-7-activation-hack.html</id><summary type="html">&lt;p&gt;When installing Windows 7 it's very picky about which installation disc you use
+(Full vs. Upgrade) and if improperly matched with your key can prevent you from
+activating your copy of Windows usually returning an "Invalid Product Key" error
+message.  You may also see the same or similar error when you do a full, clean
+installation with an upgrade disc.  This can be very annoying, especially when
+you have a legitimate key and disc but just didn't install it the way Microsoft
+thinks you should.  In the event that you are having trouble activating your
+Windows 7 installation with a legitimate key, try the following registry hack:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;First make sure there are no pending tasks requiring a reboot.This is
+     indicated by an orange shield icon next to your shutdown button on the
+     Start menu or in the notification tray.&lt;/li&gt;
+&lt;li&gt;Open the Registry Editor (Start -&amp;gt;  search for "regedit" and hit Enter)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Navigate to the following registry key:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OOBE
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Double click on &lt;code&gt;MediaBootInstall&lt;/code&gt; in the right pane and change
+     "Value data" to &lt;code&gt;0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;Open a command prompt with administrative rights (Start -&amp;gt;  search for
+     "cmd" and hit Enter)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Run the following command to reset Windows activation status:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;slmgr -rearm
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Reboot your computer.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;Run the Activate Windows utility (Start -&amp;gt; search for "Activate Windows"),
+     enter your upgrade product key and activate Windows.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This activation hack will only work if you have a legitimate key.
+This method wont help if you have a pirated copy of Windows.&lt;/p&gt;</summary><category term="Activation"></category><category term="Hack"></category><category term="Microsoft"></category><category term="Regedit"></category><category term="Registry"></category><category term="Windows 7"></category></entry><entry><title>Free Alternative Lightweight Software for Windows (Part 2)</title><link href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-2.html" rel="alternate"></link><published>2008-10-13T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-13:free-alternative-lightweight-software-for-windows-part-2.html</id><summary type="html">&lt;p&gt;Part 2 of my Free Alternative Lightweight Software for Windows will cover basic
+security and performance enhancing/maintenance tools.&lt;/p&gt;
+&lt;p&gt;I have broken this article into four parts to make it easier on both you, the
+reader, and me. As I publish the other sections of this article, I will add a
+link to them.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Part 1 - &lt;a href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-1.html"&gt;Communication/Business Tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Part 2 - Security/Performance Tools&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Part 3 - Media Tools (Never published)&lt;/li&gt;
+&lt;li&gt;Part 4 - Miscellaneous Tools (Never published)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.avast.com/"&gt;Avast! Antivirus&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Norton Antivirus, McAffee Antivirus&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://free.avg.com/"&gt;AVG&lt;/a&gt;, &lt;a href="http://www.avira.com/"&gt;Avira&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Unobtrusive, Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;Avast! antivirus is powerful anti virus software, but, unlike its mainstream
+competitors, Norton and McAffee, you’ll barely be able to tell that it’s there.
+Avast! is lightweight and unobtrusive, it wont bog down your system and barely
+bugs you unless it finds a virus or other malicious code. The home edition of
+Avast! is free for 13 months if you register it, and when it expires, all you
+have to do is register again to get another 13 months of updates.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.avast.com/eng/download-avast-home.html"&gt;Download Avast! Antivirus&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_avast_antivirus/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.microsoft.com/windows/products/winfamily/defender/default.mspx"&gt;Windows Defender&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Ad-Aware&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Unobtrusive, Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;What’s that? A product by Microsoft that isn’t a piece of crap? And it’s free to
+anyone with Windows XP or Vista?! It’s hard to believe, but it’s true, Windows
+Defender is actually a solid product, and free so long as you’re using XP or
+Vista. Also, unlike it’s alternatives, Windows Defender never bugs you unless it
+finds some malicious software. The one thing I will say that it has working
+against it though is that it uses Windows Update for maintaining its spyware
+list.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://tinyurl.com/dyvaw"&gt;Download Windows Defender&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_microsoft_antispyware/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.piriform.com/ccleaner"&gt;CCleaner&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast, Automation&lt;/p&gt;
+&lt;p&gt;From CCleaner.com:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;CCleaner is a freeware system optimization, privacy and cleaning tool. It
+removes unused files from your system – allowing Windows to run faster and
+freeing up valuable hard disk space. It also cleans traces of your online
+activities such as your Internet history. Additionally it contains a fully
+featured registry cleaner. But the best part is that it’s fast&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="http://www.ccleaner.com/download"&gt;Download CCleaner&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_ccleaner/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.piriform.com/defraggler"&gt;Defraggler&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Windows Defrag Tool&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;Defraggler is a freeware hard drive defraging tool by Piriform, the same people
+who created CCleaner. Defragglers differs from most defrag tools on the market,
+by allowing you to easily defrag individual files, without the need to defrag
+the whole drive. All you ahve to do is run it, select the file(s) you would like
+to defrag and in seconds that file will be fully defragmented. Of course you
+always have the option to defrag the whole drive.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.defraggler.com/download"&gt;Download Dfraggler&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_defraggler/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;</summary><category term="Avast! Antivirus"></category><category term="CCleaner"></category><category term="Defraggler"></category><category term="Defragler"></category><category term="Open Source"></category><category term="Software"></category><category term="Windows Defender"></category></entry><entry><title>Free Alternative Lightweight Software for Windows (Part 1)</title><link href="http://blog.chriskankiewicz.com/free-alternative-lightweight-software-for-windows-part-1.html" rel="alternate"></link><published>2008-10-03T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-10-03:free-alternative-lightweight-software-for-windows-part-1.html</id><summary type="html">&lt;p&gt;Sick of your computer running like molasses? Tired of having to perform that
+annual (semi-annual?) reformat and installation of your operating system? Do you
+wish your computer just ran faster? Well maybe some free alternative lightweight
+software will solve your problem! On the other hand, if you enjoy the time you
+have to make coffee while you load that simple .PDF file, please stop reading
+now.&lt;/p&gt;
+&lt;p&gt;I have a fairly complex, yet powerful, Windows box that I run as my primary
+machine and it runs great. Now this is by no coincidence, it’s taken some hard
+work to make this thing run like a well oiled machine. I do, however, owe a
+great deal of thanks to the plethora of free (as in beer), lightweight software
+I have installed. What software you might ask? Well here’s a list I’ve compiled
+of some of the best software I’ve run into that will keep your computer from
+slowing down and your resources free so you can do more important things, like
+surf for porn.&lt;/p&gt;
+&lt;p&gt;I have broken this article into four parts to make it easier on both you, the
+reader, and me. As I publish the other sections of this article, I will add a
+link to them.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Part 1 - Communication/Business Tools&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Part 2 - &lt;a href="http://blog.chriskankiewicz.com/post/4217685381/free-alternative-lightweight-software-for-windows-part-2"&gt;Security/Performance Tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 3 - Media Tools (Never published)&lt;/li&gt;
+&lt;li&gt;Part 4 - Miscellaneous Tools (Never published)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.mozilla.com/en-US/firefox/fx/"&gt;Firefox&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Internet Explorer&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.apple.com/safari/"&gt;Safari&lt;/a&gt;,
+&lt;a href="http://www.google.com/chrome"&gt;Chrome&lt;/a&gt;, &lt;a href="http://www.opera.com/"&gt;Opera&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Speed, Extensions, Open Source&lt;/p&gt;
+&lt;p&gt;Firefox is an open source alternative web browser by Mozilla that provides a
+much better web browsing experience than it’s defacto alternative, Internet
+Explorer. Some of the key features of Firefox include enhanced security
+features, increased speed, and virtually limitless customization through themes
+and extensions. Be sure to pay attention as Mozilla will soon be releasing
+Firefox 3.1 which is supposed to include a few new features and even more speed
+improvements.&lt;/p&gt;
+&lt;p&gt;Recommended Extensions:
+&lt;a href="https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/"&gt;Adblock Plus&lt;/a&gt;,
+Filterset.G Updater, Foxmarks Bookmark Sync, and IE Tab&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.mozilla.com/en-US/firefox/"&gt;Download Firefox&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_firefox/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.mozillamessaging.com/en-US/thunderbird/"&gt;Thunderbird&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Microsoft Outlook, Outlook Express&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="https://www.gmail.com/"&gt;Gmail&lt;/a&gt;,
+&lt;a href="https://mail.yahoo.com/"&gt;Yahoo! Mail&lt;/a&gt;,
+&lt;a href="www.hotmail.com/"&gt;Windows Live Hotmail&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Extensions, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; No Exchange support (yet)&lt;/p&gt;
+&lt;p&gt;Another great product from the Mozilla team, the Thunderbird email client, is a
+great alternative to the pre-installed Outlook Express and, with the right
+extensions, an adequate replacement for Microsoft Outlook. The biggest drawback
+with Thunderbird right now is the lack of MS Exchange support, but (as far as I
+know) they plan on changing that with the release of Thunderbird 3.0.&lt;/p&gt;
+&lt;p&gt;Recommended Extensions: Lightning, Provider, Enigmail&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.mozilla.com/en-US/thunderbird/"&gt;Download Thunderbird&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_thunderbird/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.pidgin.im"&gt;Pidgin&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; AOL Instant Messenger, Yahoo! Messenger, MSN Messenger&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.trillian.im/"&gt;Trillian&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Ad Free, Plugins, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; No Video Chat (at the moment)&lt;/p&gt;
+&lt;p&gt;Pidgin is a free instant messaging platform designed to centralize the vast
+array of popular instant messaging protocols in to one easy to use program.
+Pidgin allows you to be logged on to multiple instant messaging systems at the
+same time through one simple user interface. The following protocols are
+supported: AIM, MSN, Yahoo!, Gtalk/Jabber, ICQ, Gadu Gadu, and more…&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.pidgin.im/download"&gt;Download Pidgin&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_pidgin/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.openoffice.org"&gt;OpenOffice.org&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Microsoft Office&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Plugins, Open Source, Can read from and write to MS Office files&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; (Very) Slight Learning Curve&lt;/p&gt;
+&lt;p&gt;Just get a new computer and don’t want to fork out another $150 for word
+processing software? Well then OpenOffice.org is your answer! OpenOffice.org is
+a free and open source office software suite. Included are applications for word
+processing, spreadsheets, presentations, graphics, databases and more. And just
+when you thought it couldn’t get any better, OpenOffice.org 3.0 is currently in
+it’s third revision of a release candidate and will hopefully be out with a
+final version soon.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://download.openoffice.org/index.html"&gt;Download OpenOffice.org&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_openoffice/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://notepad-plus-plus.org/"&gt;Notepad++&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Notepad&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; &lt;a href="http://www.flos-freeware.ch/notepad2.html"&gt;Notepad2&lt;/a&gt;,
+&lt;a href="http://www.jedit.org/"&gt;Jedit&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Plugins, Open Source&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;Notepad++ is one of many Notepad replacements. Unlike typical Notepad, however,
+Notepad++ features many front and back end improvements. On the front end you
+have such noticeable features like tabbed files, line numbers, syntax
+highlighting, syntax folding, and code completion. In te rms of back end
+improvements, the following is taken from the Notepad++ homepage:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Based on a powerful editing component Scintilla, Notepad++ is written in C++
+and uses pure Win32 API and STL which ensures a higher execution speed and
+smaller program size.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="http://notepad-plus.sourceforge.net/uk/site.htm"&gt;Download Notepad++&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_notepad/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.foxitsoftware.com/pdf/reader/"&gt;Foxit Reader&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Adobe PDF Reader&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast, Plugins, Annotation Tool&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; Occasional Rendering Mistakes (very rare)&lt;/p&gt;
+&lt;p&gt;Of all the software on this list, you will probably notice the biggest
+difference in speed and performance when using Foxit Reader. Compared to the
+“official” Adobe PDF Reader, Foxit Reader is incredibly small (just over 2.5MB),
+blazing fast, and its core function is compatible with PDF Standard 1.7. Foxit
+Reader also comes standard with an annotation tool, unlike Adobe, who would
+charge you $299 for their pro version to get feature.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.foxitsoftware.com/pdf/reader_2/down_reader.htm"&gt;Download Foxit Reader&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_foxit/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;&lt;a href="http://www.cutepdf.com/products/cutepdf/writer.asp"&gt;CutePDF Writer&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Replaces:&lt;/strong&gt; Adobe PDF Writer&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Lightweight, Fast&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons:&lt;/strong&gt; N/A&lt;/p&gt;
+&lt;p&gt;Lastly, CutePDF Writer is a very lightweight PDF creation program. After
+installing CutePDF Writer, creating a .PDF document is as easy as 1, 2, 3. All
+you have to do is 1) choose the print option from the document you wish to
+convert. 2) Select the CutePDF option under the list of printers. 3) Choose a
+location to save the document and hit the save button.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.cutepdf.com/Products/CutePDF/writer.asp"&gt;Download CutePDF Writer&lt;/a&gt; |
+&lt;a href="http://www.filehippo.com/download_cutepdf_writer/"&gt;Mirror&lt;/a&gt;&lt;/p&gt;</summary><category term="CutePDF Writer"></category><category term="Firefox 3"></category><category term="Foxit Reader"></category><category term="Free Software"></category><category term="Notepad++"></category><category term="Open Source"></category><category term="OpenOffice.org"></category><category term="Pidgin"></category><category term="Thunderbird 2"></category></entry></feed>

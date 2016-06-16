@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Setting Up an Ubuntu Web Server | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="Ubuntu" />
+        <meta name="tags" contents="LAMP" />
+        <meta name="tags" contents="Linux" />
+        <meta name="tags" contents="Apache" />
+        <meta name="tags" contents="MySQL" />
+        <meta name="tags" contents="PHP" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Setting Up an Ubuntu Web Server</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="January 18, 2012 - 05:42 PM">
+                                        <div class="month">Jan</div>
+                                        <div class="day">18</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/ubuntu.html">Ubuntu</a></li>
+                                            <li><a href="./tag/lamp.html">LAMP</a></li>
+                                            <li><a href="./tag/linux.html">Linux</a></li>
+                                            <li><a href="./tag/apache.html">Apache</a></li>
+                                            <li><a href="./tag/mysql.html">MySQL</a></li>
+                                            <li><a href="./tag/php.html">PHP</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>Having set up several Debian and Ubuntu web servers in the past I thought it
+would be a good idea to share my process. The following is a relatively
+comprehensive guide to installing and configuring an Apache based web server
+with some optimizations and basic resource monitoring. I primarily work with
+Ubuntu servers, but most of the commands here should work exactly the same in
+Debian or Ubuntu. I've tried to note where differences may occur.</p>
+<h2>Download and Install the OS</h2>
+<p>If you are setting up your own server, the first thing you will need to do is
+download the ISO that corresponds to your hardware (32/64-bit), burn it to CD
+and install it to your server.</p>
+<ul>
+<li>For Ubuntu go to
+    <a href="http://www.ubuntu.com/download/server/download">http://www.ubuntu.com/download/server/download</a></li>
+<li>For Debian go to
+    <a href="http://www.debian.org/distrib/">http://www.debian.org/distrib/</a></li>
+</ul>
+<p><strong>Note:</strong> It is strongly recommended that you choose the LTS (Long Term Service)
+release if you decide to go with Ubuntu.</p>
+<p>The installation process is relatively straight forward, so I will not be going
+over that here, simply boot to the disc and follow the on-screen instructions.
+Once the OS is installed continue with the instructions below.</p>
+<hr />
+<h2>Create a User Account</h2>
+<p>On most Ubuntu installations you should have created a user account during
+installation and this wont be necessary. However, the following may be needed on
+some web hosts or a VPS. After a Debian installation you are only given access
+to the <code>root</code> account. It can be dangerous to run as root all the time and
+creating a non-privelleged user account for yourself is recommended. Depending
+on your installation some of the following may already be configured.</p>
+<h3>Create a user account for yourself:</h3>
+<div class="highlight"><pre><span></span># adduser &lt;user_name&gt;
+</pre></div>
+
+
+<h3>Install sudo:</h3>
+<div class="highlight"><pre><span></span># apt-get install sudo
+</pre></div>
+
+
+<h3>Add the newly created user to the sudoers file by running:</h3>
+<div class="highlight"><pre><span></span># visudo
+</pre></div>
+
+
+<h3>Add your username under the existing <code>root</code> entry:</h3>
+<div class="highlight"><pre><span></span>root ALL=(ALL) ALL
+&lt;user_name&gt; ALL=(ALL) ALL
+</pre></div>
+
+
+<p>Now log out and back in with the new user.</p>
+<hr />
+<h2>Update Your System</h2>
+<p>Most installations will not be up-to-date after installation and will be missing
+several bug and security fixes. We must now update the system to pull in all the
+latest patches.</p>
+<h3>Run system updates:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get dist-upgrade
+</pre></div>
+
+
+<p>Once all updates are complete, restart your system.</p>
+<hr />
+<h2>Configure Hostname and Timezone</h2>
+<p>While the hostname is of minor importance for most things to run properly, it's
+good practice to set it up after installation. The timezone on the other hand
+can have critical effects on the applications and scripts that run on your
+server if not configured properly.</p>
+<h3>Set the Hostname:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/hostname
+</pre></div>
+
+
+<p>Add your new hostname to this file and save it, then run:</p>
+<div class="highlight"><pre><span></span>$ sudo /etc/init.d/hostname start
+</pre></div>
+
+
+<h3>Edit the hosts file:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/hosts
+</pre></div>
+
+
+<p>Add the following if not already present:</p>
+<div class="highlight"><pre><span></span>127.0.0.1 localhost.localdomain localhost
+&lt;server_ip&gt; &lt;hostname&gt;.example.com &lt;hostname&gt;
+</pre></div>
+
+
+<h3>Set the Timezone:</h3>
+<div class="highlight"><pre><span></span>$ sudo dpkg-reconfigure tzdata
+</pre></div>
+
+
+<hr />
+<h2>Set Up LAMP Server with APC and PHPMyAdmin</h2>
+<p>Installing the LAMP stack is quick and painless with apt. Simply use the
+following commands to get everything installed.</p>
+<h3>Install LAMP stack on Ubuntu:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install lamp-server<span class="se">\^</span> php-apc phpmyadmin
+</pre></div>
+
+
+<h3>Install LAMP stack on Debian:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install apache2 mysql-server php5 php-pear php5-mysql php-apc phpmyadmin
+</pre></div>
+
+
+<p>We will also need a mail server to handle outgoing email requests.</p>
+<h3>Insatll Postfix Mail Server:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install postfix
+</pre></div>
+
+
+<p>When installing postfix you'll go through some configuration screens. The
+defaults should be fine for a basic web server setup.</p>
+<hr />
+<h2>Configure PHP and APC</h2>
+<p>Now that you have your LAMP stack setup you will need to configure it for
+running in a production environment. Some of the following settings may already
+be set, but it's a good idea to check them all anyway.</p>
+<h3>Enable mod_rewrite:</h3>
+<div class="highlight"><pre><span></span>$ sudo a2enmod rewrite
+</pre></div>
+
+
+<h3>Configure PHP:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/php5/apache2/php.ini
+</pre></div>
+
+
+<p>Now locate and modify the following values:</p>
+<div class="highlight"><pre><span></span>short_open_tag = On
+max_execution_time = 30
+memory_limit = 128M
+error_reporting = E_ALL &amp; \~E_DEPRECATED
+display_errors = Off
+log_errors = On
+post_max_size = 8M
+upload_max_filesize = 8M
+date.timezone = &lt;your_timezone&gt; ; See: http://php.net/date.timezone
+</pre></div>
+
+
+<h3>Edit your APC config:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/php5/conf.d/apc.ini
+</pre></div>
+
+
+<p>Add the following:</p>
+<div class="highlight"><pre><span></span>extension = apc.so
+apc.shm_size = 128
+</pre></div>
+
+
+<h3>Restart Apache:</h3>
+<div class="highlight"><pre><span></span>$ sudo /etc/init.d/apache2 restart
+</pre></div>
+
+
+<hr />
+<h2>Set Web Directory User and Permissions</h2>
+<p>Now that you have everything installed and configured you'll need to set up some
+file permissions to allow Apache to read from, and you to write to, the web
+directory. This will be accomplished by changing the owner of the web directory,
+adding the Apache user and your user to this group and setting the guid bit
+forcing all new files/folders to have the same group permissions.</p>
+<h3>Create a new group:</h3>
+<div class="highlight"><pre><span></span>$ sudo addgroup webdev
+</pre></div>
+
+
+<h3>Change the group of your web directory:</h3>
+<div class="highlight"><pre><span></span>$ sudo chgrp -R webdev /var/www/
+$ sudo chmod -R g+rw /var/www/
+</pre></div>
+
+
+<h3>Set the guid bit on all folders in your web directory:</h3>
+<div class="highlight"><pre><span></span>$ sudo find /var/www -type d -exec chmod +s <span class="o">{}</span> <span class="se">\\</span><span class="p">;</span>
+</pre></div>
+
+
+<h3>Add Apache to the webdev group:</h3>
+<div class="highlight"><pre><span></span>$ sudo usermod -a -G webdev www-data
+</pre></div>
+
+
+<h3>Add your user to the webdev group:</h3>
+<div class="highlight"><pre><span></span>$ sudo usermod -a -G webdev &lt;user_name&gt;
+</pre></div>
+
+
+<hr />
+<h2>Enable System Monitoring and Alerts</h2>
+<p>Even the best configured servers have problems every now and again. To monitor
+our servers resources we will install and configure
+<a href="http://mmonit.com/monit/">Monit</a>. Monit allows us to set custom events to
+monitor and define the actions to be taken.</p>
+<h3>Install Monit:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install monit
+</pre></div>
+
+
+<h3>Edit the monitrc file:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/monit/monitrc
+</pre></div>
+
+
+<p>Copy/paste the following configuration file and change values where you need to.</p>
+<div class="highlight"><pre><span></span>### Monit configuration:
+
+################################################################################
+## Monit control file
+################################################################################
+
+set daemon 120 # Check services at 2-minute intervals
+set logfile syslog facility log_daemon # Set logging to the
+systemlog
+set alert &lt;email_address&gt; # Set your email address
+
+set mailserver localhost
+with timeout 15 seconds
+
+set httpd port 2812 and
+allow &lt;user_name&gt;: &lt;password&gt; # set user name and password here
+
+################################################################################
+## Services
+################################################################################
+
+check system &lt;hostname&gt;
+if loadavg (1min) \&gt; 4 then alert
+if loadavg (5min) \&gt; 2 then alert
+if memory usage \&gt; 80% then alert
+if cpu usage (user) \&gt; 70% then alert
+if cpu usage (system) \&gt; 30% then alert
+if cpu usage (wait) \&gt; 20% then alert
+
+check process apache with pidfile /var/run/apache2.pid
+start program = &quot;/etc/init.d/apache2 start&quot; with timeout 60 seconds
+stop program = &quot;/etc/init.d/apache2 stop&quot;
+if cpu \&gt; 60% for 2 cycles then alert
+if cpu \&gt; 90% for 5 cycles then restart
+if totalmem \&gt; 512.0 MB for 5 cycles then alert
+# if totalmem \&gt; 512.0 MB for 5 cycles then restart
+if children \&gt; 250 then restart
+if failed host localhost port 80 protocol http then restart
+if 3 restarts within 5 cycles then timeout
+
+check process mysql with pidfile /var/lib/mysql/&lt;hostname&gt;.pid
+group mysql
+start program = &quot;/etc/init.d/mysql start&quot;
+stop program = &quot;/etc/init.d/mysql stop&quot;
+if failed host localhost port 3306 then restart
+if 5 restarts within 5 cycles then timeout
+
+check process sshd with pidfile /var/run/sshd.pid
+start program &quot;/etc/init.d/ssh start&quot;
+stop program &quot;/etc/init.d/ssh stop&quot;
+if failed port 22 protocol ssh then restart
+if 5 restarts within 5 cycles then timeout
+</pre></div>
+
+
+<h3>Edit the monit config file:</h3>
+<div class="highlight"><pre><span></span>$ /etc/default/monit
+</pre></div>
+
+
+<p>Enable Monit by setting the following:</p>
+<div class="highlight"><pre><span></span># You must set this variable to for monit to start
+startup=1
+</pre></div>
+
+
+<h3>Start Monit:</h3>
+<div class="highlight"><pre><span></span>$ sudo /etc/init.d/monit start
+</pre></div>
+
+
+<hr />
+<h2>Set Up UFW (Uncomplicated Firewall)</h2>
+<p>Being a production system, you shouldn't expose any ports that aren't being
+used. This is where a firewall comes in handy. You will set up the Uncomplicated
+Firewall (UFW), a simplified front-end for iptables.</p>
+<h3>Install UFW:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install ufw
+</pre></div>
+
+
+<h3>Configure UFW:</h3>
+<div class="highlight"><pre><span></span>$ sudo ufw allow 22
+$ sudo ufw allow 80
+$ sudo ufw allow 443
+$ sudo ufw allow 2812
+$ sudo ufw default deny
+</pre></div>
+
+
+<h3>Enable UFW:</h3>
+<div class="highlight"><pre><span></span>$ sudo ufw <span class="nb">enable</span>
+</pre></div>
+
+
+<hr />
+<h2>Set Up Unattended Upgrades</h2>
+<p>System updates are released frequently and while manually installing these
+updates usually only takes a few minutes a day, automating these updates is
+easy.</p>
+<p><strong>WARNING:</strong> Applying any updates can potentially break your system and
+automating these may leave your system broken without your knowledge. However,
+in the several years I've been administering servers I've never personally seen
+an update do any damage. I also feel the benefits of automating security updates
+outweighs the potential downsides of missing a critical update that may leave
+your system vulnerable to attack.</p>
+<h3>Install Unattended Upgrades:</h3>
+<div class="highlight"><pre><span></span>$ sudo apt-get install unattended-upgrades
+</pre></div>
+
+
+<h3>Run the first time configuration:</h3>
+<div class="highlight"><pre><span></span>$ sudo dpkg-reconfigure unattended-upgrades
+</pre></div>
+
+
+<h3>Configure other settings:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/apt/apt.conf.d/50unattended-upgrades
+</pre></div>
+
+
+<p>Edit the following:</p>
+<div class="highlight"><pre><span></span><span class="o">//</span> <span class="nt">Automatically</span> <span class="nt">upgrade</span> <span class="nt">packages</span> <span class="nt">from</span> <span class="nt">these</span> <span class="o">(</span><span class="nt">origin</span><span class="o">,</span> <span class="nt">archive</span><span class="o">)</span> <span class="nt">pairs</span>
+<span class="nt">Unattended-Upgrade</span><span class="o">:</span><span class="nd">:Allowed-Origins</span> <span class="p">{</span>
+<span class="s2">&quot;Ubuntu lucid-security&quot;</span><span class="p">;</span>
+<span class="o">//</span> <span class="s2">&quot;Ubuntu lucid-updates&quot;</span><span class="p">;</span>
+<span class="p">}</span><span class="o">;</span>
+
+<span class="o">//</span> <span class="nt">List</span> <span class="nt">of</span> <span class="nt">packages</span> <span class="nt">to</span> <span class="nt">not</span> <span class="nt">update</span>
+<span class="nt">Unattended-Upgrade</span><span class="o">:</span><span class="nd">:Package-Blacklist</span> <span class="p">{</span>
+<span class="o">//</span> <span class="s2">&quot;vim&quot;</span><span class="p">;</span>
+<span class="o">//</span> <span class="s2">&quot;libc6&quot;</span><span class="p">;</span>
+<span class="o">//</span> <span class="s2">&quot;libc6-dev&quot;</span><span class="p">;</span>
+<span class="o">//</span> <span class="s2">&quot;libc6-i686&quot;</span><span class="p">;</span>
+<span class="p">}</span><span class="o">;</span>
+
+<span class="o">//</span> <span class="nt">Send</span> <span class="nt">email</span> <span class="nt">to</span> <span class="nt">this</span> <span class="nt">address</span> <span class="nt">for</span> <span class="nt">problems</span> <span class="nt">or</span> <span class="nt">packages</span> <span class="nt">upgrades</span>
+<span class="o">//</span> <span class="nt">If</span> <span class="nt">empty</span> <span class="nt">or</span> <span class="nt">unset</span> <span class="nt">then</span> <span class="nt">no</span> <span class="nt">email</span> <span class="nt">is</span> <span class="nt">sent</span><span class="o">,</span> <span class="nt">make</span> <span class="nt">sure</span> <span class="nt">that</span> <span class="nt">you</span>
+<span class="o">//</span> <span class="nt">have</span> <span class="nt">a</span> <span class="nt">working</span> <span class="nt">mail</span> <span class="nt">setup</span> <span class="nt">on</span> <span class="nt">your</span> <span class="nt">system</span><span class="o">.</span> <span class="nt">The</span> <span class="nt">package</span> <span class="s1">&#39;mailx&#39;</span>
+<span class="o">//</span> <span class="nt">must</span> <span class="nt">be</span> <span class="nt">installed</span> <span class="nt">or</span> <span class="nt">anything</span> <span class="nt">that</span> <span class="nt">provides</span> <span class="o">/</span><span class="nt">usr</span><span class="o">/</span><span class="nt">bin</span><span class="o">/</span><span class="nt">mail</span><span class="o">.</span>
+<span class="nt">Unattended-Upgrade</span><span class="o">:</span><span class="nd">:Mail</span> <span class="s2">&quot;&lt;your_email_address&gt;&quot;</span><span class="o">;</span>
+
+<span class="o">//</span> <span class="nt">Do</span> <span class="nt">automatic</span> <span class="nt">removal</span> <span class="nt">of</span> <span class="nt">new</span> <span class="nt">unused</span> <span class="nt">dependencies</span> <span class="nt">after</span> <span class="nt">the</span> <span class="nt">upgrade</span>
+<span class="o">//</span> <span class="o">(</span><span class="nt">equivalent</span> <span class="nt">to</span> <span class="nt">apt-get</span> <span class="nt">autoremove</span><span class="o">)</span>
+<span class="o">//</span><span class="nt">Unattended-Upgrade</span><span class="o">:</span><span class="nd">:Remove-Unused-Dependencies</span> <span class="s2">&quot;false&quot;</span><span class="o">;</span>
+
+<span class="o">//</span> <span class="nt">Automatically</span> <span class="nt">reboot</span> <span class="o">*</span><span class="nt">WITHOUT</span> <span class="nt">CONFIRMATION</span><span class="o">*</span> <span class="nt">if</span> <span class="nt">a</span>
+<span class="o">//</span> <span class="nt">the</span> <span class="nt">file</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">reboot-required</span> <span class="nt">is</span> <span class="nt">found</span> <span class="nt">after</span> <span class="nt">the</span> <span class="nt">upgrade</span>
+<span class="nt">Unattended-Upgrade</span><span class="o">:</span><span class="nd">:Automatic-Reboot</span> <span class="s2">&quot;false&quot;</span><span class="o">;</span>
+
+<span class="o">//</span> <span class="nt">Use</span> <span class="nt">apt</span> <span class="nt">bandwidth</span> <span class="nt">limit</span> <span class="nt">feature</span><span class="o">,</span> <span class="nt">this</span> <span class="nt">example</span> <span class="nt">limits</span> <span class="nt">the</span> <span class="nt">download</span>
+<span class="o">//</span> <span class="nt">speed</span> <span class="nt">to</span> <span class="nt">1024kb</span><span class="o">/</span><span class="nt">sec</span>
+<span class="nt">Acquire</span><span class="o">:</span><span class="nd">:http</span><span class="o">:</span><span class="nd">:Dl-Limit</span> <span class="s2">&quot;1024&quot;</span><span class="o">;</span>
+</pre></div>
+
+
+<h3>Enable Unattended Upgrades:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/apt/apt.conf.d/10periodic
+</pre></div>
+
+
+<p>Modify the following:</p>
+<div class="highlight"><pre><span></span><span class="nt">APT</span><span class="o">:</span><span class="nd">:Periodic</span><span class="o">:</span><span class="nd">:Update-Package-Lists</span> <span class="s2">&quot;1&quot;</span><span class="o">;</span>
+<span class="nt">APT</span><span class="o">:</span><span class="nd">:Periodic</span><span class="o">:</span><span class="nd">:Download-Upgradeable-Packages</span> <span class="s2">&quot;1&quot;</span><span class="o">;</span>
+<span class="nt">APT</span><span class="o">:</span><span class="nd">:Periodic</span><span class="o">:</span><span class="nd">:AutocleanInterval</span> <span class="s2">&quot;5&quot;</span><span class="o">;</span>
+<span class="nt">APT</span><span class="o">:</span><span class="nd">:Periodic</span><span class="o">:</span><span class="nd">:Unattended-Upgrade</span> <span class="s2">&quot;1&quot;</span><span class="o">;</span>
+</pre></div>
+
+
+<hr />
+<h2>Disable Root Login via Password</h2>
+<p>One last step in securing your server is to disable logging in as root over SSH
+with a password. This will prevent any automated bots from brute-forcing their
+way into your root account. You will still be able to run as root by logging
+into with your non-privileged user account and running <code>sudo su</code>.</p>
+<h3>Edit your SSH config:</h3>
+<div class="highlight"><pre><span></span>$ sudo nano /etc/ssh/sshd_config
+</pre></div>
+
+
+<h3>Uncomment the following line:</h3>
+<div class="highlight"><pre><span></span>PermitRootLogin no
+</pre></div>
+
+
+<p>Save and exit this file.</p>
+<h3>Restart the SSH daemon:</h3>
+<div class="highlight"><pre><span></span>$ sudo /etc/init.d/sshd restart
+</pre></div>
+
+
+<hr />
+<h2>Set Up SSH Key Authentication</h2>
+<p>By default, your server will allow you to log in with a user name and password.
+While secure, this method of logging in has some significant weaknesses and is
+generally inconvenient. To remedy the situation generate an SSH key and
+associate it with your server for future authentication.</p>
+<p><strong>NOTE:</strong> The following assumes you are using a derivative of Linux on your
+client workstation.</p>
+<p>Run these commands from your workstation, NOT the server.</p>
+<h3>Generate your SSH key pair:</h3>
+<div class="highlight"><pre><span></span>$ ssh-keygen -t rsa -C &lt;your_email_address&gt;
+</pre></div>
+
+
+<h3>Copy your public key to the server:</h3>
+<div class="highlight"><pre><span></span>$ ssh-copy-id user@example.com
+</pre></div>
+
+
+<p>Now try and log into your server:</p>
+<div class="highlight"><pre><span></span>$ ssh user@example.com
+</pre></div>
+
+
+<hr />
+<h2>Install Some Other Useful Tools:</h2>
+<div class="highlight"><pre><span></span>$ sudo apt-get install bwm-ng htop pastebinit whois
+</pre></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/setting-up-an-ubuntu-web-server.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Setting%20Up%20an%20Ubuntu%20Web%20Server%20 http%3A//blog.chriskankiewicz.com/setting-up-an-ubuntu-web-server.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/setting-up-an-ubuntu-web-server.html&p[images][0]=&p[title]=Setting%20Up%20an%20Ubuntu%20Web%20Server%20&p[summary]=%3Cp%3EHaving%20set%20up%20several%20Debian%20and%20Ubuntu%20web%20servers%20in%20the%20past%20I%20thought%20it%0Awould%20be%20a%20good%20idea%20to%20share%20my%20process.%20The%20following%20is%20a%20relatively%0Acomprehensive%20guide%20to%20installing%20and%20configuring%20an%20Apache%20based%20web%20server%0Awith%20some%20optimizations%20and%20basic%20resource%20monitoring.%20I%20primarily%20work%20with%0AUbuntu%20servers%2C%20but%20most%20of%20the%20commands%20here%20should%20work%20exactly%20the%20same%20in%0ADebian%20or%20Ubuntu.%20I%27ve%20tried%20to%20note%20where%20differences%20may%20occur.%3C/p%3E%0A%3Ch2%3EDownload%20and%20Install%20...%3C/h2%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Setting%20Up%20an%20Ubuntu%20Web%20Server%20&body=http%3A//blog.chriskankiewicz.com/setting-up-an-ubuntu-web-server.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./cactuscon-2014-ctf-writeup.html" title="CactusCon 2014 CTF Writeup">
+                        CactusCon 2014 CTF Writeup
+                    </a>
+                </li>
+                <li>
+                    <a href="./postfix-using-gmail-as-a-relay-host.html" title="Postfix: Using Gmail as a Relay Host">
+                        Postfix: Using Gmail as a Relay Host
+                    </a>
+                </li>
+                <li>
+                    <a href="./join-multiple-avi-files-in-ubuntu.html" title="Join multiple .avi files in Ubuntu">
+                        Join multiple .avi files in Ubuntu
+                    </a>
+                </li>
+                <li>
+                    <a href="./creating-dynamic-menus-with-php-and-css.html" title="Creating Dynamic Menus with PHP and CSS">
+                        Creating Dynamic Menus with PHP and CSS
+                    </a>
+                </li>
+                <li>
+                    <a href="./first-friday-script-updated-and-simplified.html" title="First Friday script updated and simplified">
+                        First Friday script updated and simplified
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

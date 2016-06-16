@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/miscellaneous.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2011-07-13T14:29:00-07:00</updated><entry><title>The 3-2-1 Backup Rule</title><link href="http://blog.chriskankiewicz.com/the-3-2-1-backup-rule.html" rel="alternate"></link><published>2011-07-13T14:29:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2011-07-13:the-3-2-1-backup-rule.html</id><summary type="html">&lt;p&gt;Too many people today don't backup their files. And of those that do, many don't
+do it well. An easy way to remember a "safe" way to backup your data is with the
+"3-2-1 Backup Rule" which goes like this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Keep &lt;strong&gt;3 copies&lt;/strong&gt; of any important files (your primary/working copy counts
+    as one)&lt;/li&gt;
+&lt;li&gt;Store your files on &lt;strong&gt;2 different media types&lt;/strong&gt; (Example: Hard drive and in
+    the Cloud)&lt;/li&gt;
+&lt;li&gt;Always have &lt;strong&gt;1 copy off site&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With the 3-2-1 rule you can be relatively confident that you'll always be able
+to access your critical data, even after a catastrophic failure.&lt;/p&gt;
+&lt;p&gt;Another rule I live by when it comes to backup is:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The only good backup is an automatic backup.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you're backups aren't automated, there's a good chance you'll forget to run
+them or (in my case) just be lazy about it and think, "I'll back it up
+tomorrow." at which point a failure occurs and you're shit out of luck.&lt;/p&gt;
+&lt;p&gt;For those of you without a backup plan in place, I'd like to recommend a service
+I use, &lt;a href="http://www.crashplan.com/"&gt;CrashPlan&lt;/a&gt;. CrashPlan allows you to backup to
+any of your own computers that also have CrashPlan installed for free. You can
+also backup to local folders and external drives and (with a little hacking)
+network drives as well. For a (reasonable) price, CrashPlan also supports
+limited and unlimited online backup plans. Clients are available for Windows,
+Linux and Mac operating systems, so it should work for any system you currently
+own. For more info and to download CrashPlan go to
+&lt;a href="http://www.crashplan.com"&gt;http://www.crashplan.com&lt;/a&gt;&lt;/p&gt;</summary><category term="Backup"></category><category term="CrashPlan"></category></entry><entry><title>How Geek am I?</title><link href="http://blog.chriskankiewicz.com/how-geek-am-i.html" rel="alternate"></link><published>2008-11-08T00:00:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2008-11-08:how-geek-am-i.html</id><summary type="html">&lt;p&gt;So, Gizmodo had a list of 50 skills every geek should know. Seeing as I choose
+to don the title of “Geek” I feel obligated to see how many of these skills I
+posses.&lt;/p&gt;
+&lt;p&gt;Skills marked in &lt;strong&gt;Bold&lt;/strong&gt; are skill I have and have used, or have all the
+essential knowledge to perform without reference. My notes are [encased in
+square brackets].&lt;/p&gt;
+&lt;p&gt;View the original article @
+&lt;a href="http://gizmodo.com/5078829/the-50-skills-every-geek-should-have"&gt;http://gizmodo.com/5078829/the-50-skills-every-geek-should-have&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Check out the list after the break.&lt;/p&gt;
+&lt;h2&gt;The List&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install a hard drive in a laptop&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Perform a clean OS install on a machine with two OSes&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Swap out the battery on your iPod/iPhone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Jailbreak an iPhone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Wire your house for Ethernet and Coax cable&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use BitTorrent and RSS to automatically download new shows from
+     trackers&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use an A/V receiver to its fullest capability (every port is
+     taken)&lt;/strong&gt; [with the right equipment]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Calibrate an HDTV without the manual&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use a DSLR in full manual mode&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hack the encryption and mooch your neighbor’s Wi-Fi&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Solder cleanly enough to get around a circuit board&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use your 3G phone as a Wi-Fi access point&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Shove the guts of a modern game console into a retro game console&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Design a webpage in HTML by hand that features a picture of your cat&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use Photoshop to imperceptibly doctor a photo&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Abstain from buying extended warranties&lt;/strong&gt; [a definite must for a geek]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Know where to buy cheap cables and accessories&lt;/strong&gt; [newegg.com is a good
+      start]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fix your parents’ computer over the phone without looking at a
+      computer&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Enter the Konami code&lt;/strong&gt; [Up Up Down Down Left Right Left Right B A
+      Start]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Comment on Gizmodo from your phone&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Type quickly using T9 texting&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Program a universal remote&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Contribute code to the Linux kernel&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hide porn from your significant other&lt;/strong&gt; [though I'd prefer to share it
+      with her ;-) ]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Avoid DRM on everything&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Know how to back up your data to networked storage - and actually do
+      it&lt;/strong&gt; [set this up on a scheduled task]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Watch TV shows on the internet for free&lt;/strong&gt; [hulu.com, BOOM BABY!]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Edit together digital video ripped from YouTube&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Play any SNES game on your computer through an emulator&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Reset expired trial software by messing with the registry&lt;/strong&gt; [been a
+      while, but have done this]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hackintosh your PC&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Download pre-release movies from Usenet&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hack the Wii to play homebrew games&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get around web content filters on public computers&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get into a Windows computer if you forgot your password&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Securely erase your data so it can’t be recovered&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Share a printer between a Mac and a PC on a network&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Build a fighting robot&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Write your own Firefox plugins&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Navigate and reorganize the files on your computer in DOS&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Get something on the front page of Digg&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Get through to executive customer service&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Rip a CD to V0 quality MP3s&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Rip a DVD to DivX&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Build your own computer from parts&lt;/strong&gt; [there is no other way]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Swap out the hard drive in your DVR for a bigger one&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Get an NES cartridge working again by blowing in it&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Calibrate a 7.1 surround-sound system&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Play downloaded games on a Nintendo DS&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Talk about things that aren’t tech related&lt;/strong&gt; [possible, but difficult]&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;30 out of 50… not too bad I guess, though I’m sure a simple Google search or two
+and I’d have the knowledge most of these other skills require.&lt;/p&gt;
+&lt;p&gt;Examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.google.com/search?q=Rip+a+CD+to+V0+quality+MP3s"&gt;http://www.google.com/search?q=Rip+a+CD+to+V0+quality+MP3s&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.google.com/search?q=Hack+the+Wii+to+play+homebrew+games"&gt;http://www.google.com/search?q=Hack+the+Wii+to+play+homebrew+games&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now that’s where the true test of a Geek lies, in his ability to find solutions
+where he has none, aka Google-fu.&lt;/p&gt;</summary><category term="Geek"></category><category term="Gizmodo"></category><category term="Google-fu"></category><category term="Konami Code"></category></entry></feed>

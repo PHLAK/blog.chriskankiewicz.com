@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Basic Web Server Setup with Ubuntu 14.04 + Nginx + PHP | Chris Kankiewicz &bull; Thoughts and ramblings of a web geek</title>
+
+<link href="/theme/img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+
+<!-- META -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- STYLES / FONTS -->
+<link href="/theme/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/theme/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Arvo|Droid+Sans+Mono" media="screen" rel="stylesheet" type="text/css">
+
+<!-- SCRIPTS -->
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/theme/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    // Enable Tooltips
+    $(document).ready(function() { $('[rel="tooltip"]').tooltip(); });
+</script>
+
+
+        <meta name="tags" contents="Ubuntu" />
+        <meta name="tags" contents="Nginx" />
+        <meta name="tags" contents="PHP" />
+        <meta name="tags" contents="MySQL" />
+        <meta name="tags" contents="Web Server" />
+
+</head>
+
+<body>
+
+<div class="site-nav navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href=".">
+                <div class="title-img pull-left">
+                    <img src="https://gravatar.com/avatar/f5989c312a1d99856be8474aca4de791?s=120" alt="Chris Kankiewicz" class="img-circle img-responsive">
+                </div>
+                <span class="site-title">Chris Kankiewicz</span>
+            </a>
+
+        </div>
+
+        <div id="navbar-collapse" class="collapse navbar-collapse">
+
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav">
+
+                    <li class="dropdown">
+
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Categories <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+
+                                <li >
+                                    <a href="./category/development.html">Development</a>
+                                </li>
+                                <li >
+                                    <a href="./category/gaming.html">Gaming</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hacking.html">Hacking</a>
+                                </li>
+                                <li >
+                                    <a href="./category/hardware.html">Hardware</a>
+                                </li>
+                                <li  class="active">
+                                    <a href="./category/linux.html">Linux</a>
+                                </li>
+                                <li >
+                                    <a href="./category/miscellaneous.html">Miscellaneous</a>
+                                </li>
+                                <li >
+                                    <a href="./category/software.html">Software</a>
+                                </li>
+
+                            <li class="divider"></li>
+
+                            <li><a href="./categories.html">All Categories</a></li>
+
+                        </ul>
+
+                    </li>
+
+                        <li>
+                            <a href="./feeds/all.atom.xml" class="rss-feed" title="RSS Feed" rel="tooltip" data-placement="bottom">
+                                <i class="fa fa-rss fa-lg"></i> <span class="visible-xs">RSS Feed</span>
+                            </a>
+                        </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content-area">
+        <div class="container">
+
+            <div class="post-wrapper">
+                <div class="row">
+
+                    <div class="col-md-10 col-md-offset-1 col-sm-12">
+
+                        <div class="post">
+                            <div class="post-header">
+
+                                <h2 class="post-title">Basic Web Server Setup with Ubuntu 14.04 + Nginx + PHP</h2>
+
+                                <div class="post-meta">
+
+                                    <div class="post-date" title="May 02, 2014 - 04:43 PM">
+                                        <div class="month">May</div>
+                                        <div class="day">02</div>
+                                    </div>
+
+                                    <span class="post-author">
+                                        By
+                                            <a href="./author/chris-kankiewicz.html">Chris Kankiewicz</a>
+                                    </span>
+
+                                    <span class="sep">|</span>
+
+                                    <ul class="post-tags">
+                                        <li class="tags-icon"><i class="fa fa-tags"></i></li>
+                                            <li><a href="./tag/ubuntu.html">Ubuntu</a></li>
+                                            <li><a href="./tag/nginx.html">Nginx</a></li>
+                                            <li><a href="./tag/php.html">PHP</a></li>
+                                            <li><a href="./tag/mysql.html">MySQL</a></li>
+                                            <li><a href="./tag/web-server.html">Web Server</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="post-body">
+
+                                <p>Intro will go here</p>
+<h2>Assumptions</h2>
+<p>This article assumes you:</p>
+<ul>
+<li>already have <a href="http://releases.ubuntu.com/trusty/">Ubuntu 14.04</a>
+    installed and fully patched</li>
+<li>have an account with sudo access</li>
+<li>have a basic knowledge of and are comfortable using bash</li>
+</ul>
+<h2>Configure Hostname and Timezone</h2>
+<div class="highlight"><pre><span class="err">$</span> <span class="nx">sudo</span> <span class="nb">hostname</span> <span class="o">&lt;</span><span class="nx">your_hostname</span><span class="o">&gt;</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nx">nano</span> <span class="p">/</span><span class="nx">etc</span><span class="p">/</span><span class="nb">hostname</span>
+</pre></div>
+
+
+<p>Add your host to the hosts file:</p>
+<div class="highlight"><pre><span class="err">$</span> <span class="n">sudo</span> <span class="n">nano</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+</pre></div>
+
+
+<p>Add the following line:</p>
+<div class="highlight"><pre><span class="nt">&lt;your</span><span class="na">_server_ip</span><span class="nt">&gt;</span>    <span class="nt">&lt;your</span><span class="na">_hostname</span><span class="nt">&gt;</span>
+</pre></div>
+
+
+<p>Set your server's timezone:</p>
+<div class="highlight"><pre><span class="err">$</span> <span class="n">sudo</span> <span class="n">dpkg</span><span class="o">-</span><span class="n">reconfigure</span> <span class="n">tzdata</span>
+</pre></div>
+
+
+<h2>Install Nginx, PHP and MySQL Server</h2>
+<div class="highlight"><pre><span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">nginx</span> <span class="n">php5</span><span class="o">-</span><span class="n">fpm</span> <span class="n">php5</span><span class="o">-</span><span class="n">mysql</span> <span class="n">php5</span><span class="o">-</span><span class="n">curl</span> <span class="n">php5</span><span class="o">-</span><span class="n">json</span> <span class="n">mysql</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+
+
+<h2>Configure Nginx</h2>
+<p>...</p>
+<h2>Add a Vhost</h2>
+<p>...</p>
+<h2>Configure PHP</h2>
+<p>Opcache</p>
+<p>...</p>
+<h2>Setup Web Directory Users and Permissions</h2>
+<div class="highlight"><pre><span class="err">$</span> <span class="nx">sudo</span> <span class="nx">mkdir</span> <span class="p">/</span><span class="nb">var</span><span class="p">/</span><span class="nx">www</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nb">addgroup</span> <span class="nx">webdev</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nx">chgrp</span> <span class="na">-R</span> <span class="nx">webdev</span> <span class="p">/</span><span class="nb">var</span><span class="p">/</span><span class="nx">www</span><span class="o">/</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nb">chmod</span> <span class="na">-R</span> <span class="nx">g</span><span class="o">+</span><span class="nx">rw</span> <span class="p">/</span><span class="nb">var</span><span class="p">/</span><span class="nx">www</span><span class="o">/</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nb">find</span> <span class="p">/</span><span class="nb">var</span><span class="p">/</span><span class="nx">www</span> <span class="na">-type</span> <span class="nb">d</span> <span class="na">-exec</span> <span class="nb">chmod</span> <span class="o">+</span><span class="nb">s</span> <span class="p">{}</span> <span class="o">\</span><span class="p">;</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nx">usermod</span> <span class="na">-a</span> <span class="na">-G</span> <span class="nx">webdev</span> <span class="nx">www</span><span class="na">-data</span>
+<span class="err">$</span> <span class="nx">sudo</span> <span class="nx">usermod</span> <span class="na">-a</span> <span class="na">-G</span> <span class="nx">webdev</span> <span class="o">&lt;</span><span class="nx">user_name</span><span class="o">&gt;</span>
+</pre></div>
+
+
+<h2>Miscellaneous</h2>
+<p>See <a href="">Locking Down Ubuntu Server</a></p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="post-feedback navbar navbar-default">
+
+                            <div class="post-feedback-text navbar-text">
+                                Have feedback on this post? Let me know on
+                                <a href="https://plus.google.com/+ChrisKankiewicz">Google+</a> or
+                                <a href="https://twitter.com/PHLAK">Twitter</a>.
+                            </div>
+
+                                <div class="post-feedback-share navbar-right">
+
+                                    <div class="navbar-text">Share:</div>
+
+                                    <ul class="post-share-list nav navbar-nav">
+
+                                        <li>
+                                            <a href="https://plus.google.com/share?url=http%3A//blog.chriskankiewicz.com/basic-web-server-setup-with-ubuntu-14.04-nginx-php.html" class="post-share-google-plus"  title="Google+" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-google-plus fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://twitter.com/home?status=Basic%20Web%20Server%20Setup%20with%20Ubuntu%2014.04%20%2B%20Nginx%20%2B%20PHP%20 http%3A//blog.chriskankiewicz.com/basic-web-server-setup-with-ubuntu-14.04-nginx-php.html" class="post-share-twitter" title="Twitter" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-twitter fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="http://www.facebook.com/sharer/sharer.php?s=100&p[url]=http%3A//blog.chriskankiewicz.com/basic-web-server-setup-with-ubuntu-14.04-nginx-php.html&p[images][0]=&p[title]=Basic%20Web%20Server%20Setup%20with%20Ubuntu%2014.04%20%2B%20Nginx%20%2B%20PHP%20&p[summary]=%3Cp%3EIntro%20will%20go%20here%3C/p%3E%0A%3Ch2%3EAssumptions%3C/h2%3E%0A%3Cp%3EThis%20article%20assumes%20you%3A%3C/p%3E%0A%3Cul%3E%0A%3Cli%3Ealready%20have%20%3Ca%20href%3D%22http%3A//releases.ubuntu.com/trusty/%22%3EUbuntu%2014.04%3C/a%3E%0A%20%20%20%20installed%20and%20fully%20patched%3C/li%3E%0A%3Cli%3Ehave%20an%20account%20with%20sudo%20access%3C/li%3E%0A%3Cli%3Ehave%20a%20basic%20knowledge%20of%20and%20are%20comfortable%20using%20bash%3C/li%3E%0A%3C/ul%3E%0A%3Ch2%3EConfigure%20Hostname%20and%20Timezone%3C/h2%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%20class%3D%22err%22%3E%24%3C/span%3E%20%3Cspan%20class%3D%22nx%22%3Esudo%3C/span%3E%20%3Cspan%20class%3D%22nb%22%3Ehostname%3C/span%3E%20%3Cspan%20class%3D%22o%22%3E%26lt%3B%3C/span%3E%3Cspan%20class%3D%22nx%22%3Eyour_hostname%3C/span%3E%3Cspan%20class%3D%22o%22%3E%26gt%3B%3C/span%3E%0A%3Cspan%20class%3D%22err%22%3E%24%3C/span%3E%20%3Cspan%20class%3D%22nx%22%3Esudo%3C/span%3E%20%3Cspan%20class%3D%22nx%22%3Enano%3C/span%3E%20%3Cspan%20class%3D%22p%22%3E/%3C/span%3E%3Cspan%20class%3D%22nx%22%3Eetc%3C/span%3E%3Cspan%20class%3D%22p%22%3E/%3C/span%3E%3Cspan%20class%3D%22nb%22%3Ehostname%3C/span%3E%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Cp%3EAdd%20your%20host%20to%20the%20hosts%20file%3A%3C/p%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%20class%3D%22err%22%3E%24%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Esudo%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Enano%3C/span%3E%20%3Cspan%20class%3D%22o%22%3E/%3C/span%3E%3Cspan%20class%3D%22n%22%3Eetc%3C/span%3E%3Cspan%20class%3D%22o%22%3E/%3C/span%3E%3Cspan%20class%3D%22n%22%3Ehosts%3C/span%3E%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Cp%3EAdd%20the%20following%20line%3A%3C/p%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%20class%3D%22nt%22%3E%26lt%3Byour%3C/span%3E%3Cspan%20class%3D%22na%22%3E_server_ip%3C/span%3E%3Cspan%20class%3D%22nt%22%3E%26gt%3B%3C/span%3E%20%20%20%20%3Cspan%20class%3D%22nt%22%3E%26lt%3Byour%3C/span%3E%3Cspan%20class%3D%22na%22%3E_hostname%3C/span%3E%3Cspan%20class%3D%22nt%22%3E%26gt%3B%3C/span%3E%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Cp%3ESet%20your%20server%27s%20timezone%3A%3C/p%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%20class%3D%22err%22%3E%24%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Esudo%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Edpkg%3C/span%3E%3Cspan%20class%3D%22o%22%3E-%3C/span%3E%3Cspan%20class%3D%22n%22%3Ereconfigure%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Etzdata%3C/span%3E%0A%3C/pre%3E%3C/div%3E%0A%0A%0A%3Ch2%3EInstall%20Nginx%2C%20PHP%20and%20MySQL%20Server%3C/h2%3E%0A%3Cdiv%20class%3D%22highlight%22%3E%3Cpre%3E%3Cspan%20class%3D%22err%22%3E%24%3C/span%3E%20%3Cspan%20class%3D%22n%22%3Esudo%20...%3C/span%3E%3C/pre%3E%3C/div%3E" class="post-share-facebook" title="Facebook" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-facebook fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="mailto:?subject=Basic%20Web%20Server%20Setup%20with%20Ubuntu%2014.04%20%2B%20Nginx%20%2B%20PHP%20&body=http%3A//blog.chriskankiewicz.com/basic-web-server-setup-with-ubuntu-14.04-nginx-php.html" class="post-share-email" title="Email" target="_blank" rel="tooltip" data-container="body">
+                                                <i class="fa fa-envelope fa-lg fa-fw"></i>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="page-footer">
+                <div class="row">
+
+                    <div class="col-md-4">
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Related Posts
+    </div>
+
+    <div class="panel-body">
+        <ul class="related-posts sidebar-list list-unstyled">
+                <li>
+                    <a href="./setting-up-an-ubuntu-web-server.html" title="Setting Up an Ubuntu Web Server">
+                        Setting Up an Ubuntu Web Server
+                    </a>
+                </li>
+                <li>
+                    <a href="./calculate-the-first-friday-of-next-month-with-php.html" title="Calculate the first Friday of next month with PHP">
+                        Calculate the first Friday of next month with PHP
+                    </a>
+                </li>
+                <li>
+                    <a href="./cactuscon-2014-ctf-writeup.html" title="CactusCon 2014 CTF Writeup">
+                        CactusCon 2014 CTF Writeup
+                    </a>
+                </li>
+                <li>
+                    <a href="./creating-dynamic-menus-with-php-and-css.html" title="Creating Dynamic Menus with PHP and CSS">
+                        Creating Dynamic Menus with PHP and CSS
+                    </a>
+                </li>
+                <li>
+                    <a href="./join-multiple-avi-files-in-ubuntu.html" title="Join multiple .avi files in Ubuntu">
+                        Join multiple .avi files in Ubuntu
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+</div>                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Featured Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://chriskankiewicz.com">ChrisKankiewicz.com</a></li>
+                    <li><a href="http://www.ubergallery.net">UberGallery</a></li>
+                    <li><a href="http://www.directorylister.com">Directory Lister</a></li>
+                    <li><a href="http://phlak.github.io/jColorClock/">jColorClock</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            Social Links
+        </div>
+
+        <div class="panel-body">
+            <ul class="links sidebar-list list-unstyled text-center">
+                    <li><a href="https://plus.google.com/+ChrisKankiewicz">Google+</a></li>
+                    <li><a href="https://twitter.com/PHLAK">Twitter</a></li>
+                    <li><a href="https://github.com/PHLAK">GitHub</a></li>
+                    <li><a href="https://keybase.io/chriskankiewicz">KeyBase</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="site-footer">
+    <div class="container">
+        623-252-6855 &nbsp;&bull;&nbsp;
+        <a href="mailto:Chris@ChrisKankiewicz.com">Chris@ChrisKankiewicz.com</a>
+        <br><br>
+        &copy; 2014 <a href="https://www.chriskankiewicz.com">Chris Kankiewicz</a>
+    </div>
+</div>
+<script type="text/javascript" src="/theme/js/global.js"></script>
+<script>
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-00000000-1', 'blog.chriskankiewicz.com');
+    ga('send', 'pageview');
+
+</script>
+</body>
+
+</html>

